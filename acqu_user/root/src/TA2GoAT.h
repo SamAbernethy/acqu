@@ -142,6 +142,9 @@ private:
         //Moeller
         Bool_t      moellerRead;
         UInt_t**    moellerPairs;
+        
+        //MC
+        Int_t       MCEventID;
 
 		// Display histograms
 		TH2*		Check_CBdE_E;

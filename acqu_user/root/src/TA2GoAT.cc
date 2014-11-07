@@ -76,7 +76,8 @@ TA2GoAT::TA2GoAT(const char* Name, TA2Analysis* Analysis) : TA2AccessSQL(Name, A
                                                                     eventID(0),
                                                                     moellerRead(0),
                                                                     moellerPairs(0),
-                                                                    MCEventID(0)
+                                                                    MCEventID(0),
+                                                                    MCRndID(0)
 {
     	strcpy(outputFolder,"");
     	strcpy(inputName,"");
@@ -355,7 +356,6 @@ void    TA2GoAT::PostInit()
             treeLinPol->Branch("enhancementTable", fLinPol->GetEnhTable_TC(), "enhancementTable[352]/D");
 		}
 
-<<<<<<< HEAD
         if(fMoeller)
         {
             treeMoeller = new TTree("moeller", "moeller");
@@ -388,13 +388,13 @@ void    TA2GoAT::PostInit()
             }
         }
     }
-=======
-    } else {
-        // Store MC event id for MC process
-        treeTrigger->Branch("mc_event_id", &MCEventID, "mc_event_id/I");
-    }
 
->>>>>>> Added pass-through for mc_evt_id branch through Acqu+GoAT
+    if (gAR->GetProcessType() == EMCProcess)
+    {
+        // Store MC event id for MC process
+        treeTrigger->Branch("mc_evt_id", &MCEventID, "mc_event_id/L");
+        treeTrigger->Branch("mc_rnd_id", &MCRndID, "mc_rnd_id/L");
+    }
 
     // Adding Tagger information to parameters tree
 
@@ -684,7 +684,8 @@ void    TA2GoAT::Reconstruct()
 	DataCheckHistograms();
 
     if(gAR->GetProcessType() == EMCProcess ) {
-        MCEventID = *(Int_t*) (fEvent[EI_mc_evt_id]);
+        MCEventID = *(Long64_t*) (fEvent[EI_mc_evt_id]);
+        MCRndID   = *(Long64_t*) (fEvent[EI_mc_rnd_id]);
     }
 
 	// Output scaler info on scaler read events

@@ -12,7 +12,7 @@
 #
 #
 #         Tree Name     No. of branches   Process Type
-Name:     h12           33                MC
+Name:     h12           34                MC
 #         Branch Name   Buffer size (bytes)
 Branch:   npart         4
 Branch:   dircos        4096
@@ -46,6 +46,8 @@ Branch:   mposx         1024
 Branch:   mposy         1024
 Branch:   mposz         1024
 Branch:   emwpc         1024
+Branch:   mc_evt_id     8
+Branch:   mc_rnd_id     8
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

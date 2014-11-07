@@ -144,7 +144,8 @@ private:
         UInt_t**    moellerPairs;
         
         //MC
-        Int_t       MCEventID;
+        Long64_t    MCEventID;
+        Long64_t    MCRndID;
 
 		// Display histograms
 		TH2*		Check_CBdE_E;

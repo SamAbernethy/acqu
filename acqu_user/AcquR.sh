@@ -14,6 +14,15 @@ cat ./data/AR_template.dat | sed "s#%%FILE%%#${FILE}#g" | sed "s#%%OUTDIR%%#${WD
 
 echo "Temporary AR file: ${ARFILE}"
 
-AcquRoot --batch ${ARFILE}
+../build/bin/AcquRoot --batch ${ARFILE}
 
 rm "${ARFILE}"
+
+cd "${WD}"
+
+if [ $# -eq 2 ]; then
+	echo Moving Acqu_${FILE} to "${2}"...
+	basen=$(basename ${FILE})
+	mv Acqu_${basen} "${2}"
+fi
+

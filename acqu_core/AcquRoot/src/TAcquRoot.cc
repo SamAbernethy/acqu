@@ -1272,6 +1272,7 @@ void TAcquRoot::Mk1EventLoop( UInt_t* startdata )
   // loop until end of buffer
   do{
     if( *datum == EBufferEnd ) return;	// end-of-buffer marker
+    else if( *datum == EDataBuff ) return;	// somehow reached next buffer
     fCurrEvent = *datum++;              // event number recorded in data
     nhit = 0;
     fHardError = 0;
@@ -1279,7 +1280,7 @@ void TAcquRoot::Mk1EventLoop( UInt_t* startdata )
     *hit++ = fCurrEvent;                // save DAQ event# (for saved data)
     hit++;                              // space for TA2Analysis event # 
     // transfer event's worth of data into fEvent buffer
-    while( *datum != EEndEvent ){
+    while( *datum != EEndEvent && *datum != EDataBuff ){
       switch( *(UInt_t*)datum ){
       case EScalerBuffer:			     // scaler array
 	datum = StoreScalers( datum );
@@ -1303,6 +1304,7 @@ void TAcquRoot::Mk1EventLoop( UInt_t* startdata )
     fNEvent++;					     // event counter
     fAnalysis->Process();			     // analyse the event
     fIsScalerRead = EFalse;                          // reset scaler flag
+    if( *datum == EDataBuff ) return;	// somehow reached next buffer
     datum++;                                         // start next event
   }while( datum < end );                             // don't overrun buffer
 }

@@ -140,12 +140,13 @@ inline void TA2Analysis::RawDecode( )
   fMultiADCIds.clear(); // start with an empty array
 
   for( int j=0; j<fNhits; ){
-    if( d->id > fMaxADC ){
+    if( d->id >= fMaxADC ){
       std::stringstream ss;
       ss << " Error found undefined ADC " << d->id << " in DAQ event "
          << fNDAQEvent << "\n";
       PrintMessage(ss.str().c_str(), kTRUE);
-      return;
+      d++;j++;
+      continue;
     }
     switch( fADCdefined[d->id] ){
     case 0:                             // something wrong if this happens
@@ -291,6 +292,10 @@ inline void TA2Analysis::Cleanup( )
   //
   AcquBlock_t* d = fRawData;                    // now zero any ADC hits
   for( int i=0; i<fNhits; i++ ){
+    if( d->id >= fMaxADC ){
+      d++;
+      continue;
+    }
     switch( fADCdefined[d->id] ){
     case 0:                             // something wrong if this happens
       // Error already flagged in process loop

@@ -319,6 +319,8 @@ void TAcquRoot::LinkDataServer( )
   fprintf(fLogStream," %d ADC channels and %d Scaler channels in data.\n\n",
 	 maxadc, fMaxScaler );
 
+  maxadc++; // In case the ADC list is counting from zero, and needs the last index
+
   // Create storage areas for ADC and scaler info
   fADCdefined = new Int_t[maxadc];
   fADC = new UShort_t[maxadc];

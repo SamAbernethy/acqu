@@ -57,6 +57,7 @@ HitCluster_t::HitCluster_t( Char_t* line, UInt_t index, Int_t sizefactor,
   fNeighbour = new UInt_t[n];
   fMaxHits = (n+1) * sizefactor;
   fHits = new UInt_t[ fMaxHits ];
+  fEnergies = new Double_t[ fMaxHits ];
   fHits[0] = ENullHit;
   fNhits = 0;
   fEnergy = (Double_t)ENullHit;
@@ -139,6 +140,10 @@ void HitCluster_t::ClusterDetermine( TA2ClusterDetector* cl )
   if( cl->IsIterate() ) MoreNeighbours( cl );
 
   fHits[fNhits] = EBufferEnd;                  // mark no more hits
+  // save energies locally
+  for( i=0; i<fNhits; i++ ){
+    fEnergies[i] = energy[fHits[i]];
+  }
   // Normalise weighted mean, get fraction total energy in central crystal,
   // calc circular polar coordinates of cluster center
   *fMeanPosition = (*fMeanPosition) * (1./fSqrtEtot);// normalise weighted mean

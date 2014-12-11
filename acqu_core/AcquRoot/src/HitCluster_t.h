@@ -47,6 +47,7 @@ protected:
   Int_t fMaxHits;                      // size of hits array
   UInt_t fNNearNeighbour;              // # nearest neighbours
   UInt_t* fHits;                       // indices of hit elements
+  Double_t* fEnergies;                   // energies of hit elements  
   UInt_t fNhits;                       // # of hits in cluster
 public:
   HitCluster_t( char*, UInt_t, Int_t = 1, Double_t = 0.0, Int_t = 0.0 );
@@ -72,6 +73,7 @@ public:
   Int_t GetMaxHits(){ return fMaxHits; }
   UInt_t GetNNearNeighbour(){ return fNNearNeighbour; }
   UInt_t* GetHits(){ return fHits; }
+  Double_t* GetEnergies(){ return fEnergies; }  
   UInt_t GetNhits(){ return fNhits; }
   //
   UInt_t* GetNhitsPtr(){ return &fNhits; }

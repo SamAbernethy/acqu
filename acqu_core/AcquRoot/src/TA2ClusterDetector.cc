@@ -24,6 +24,8 @@
 // e.g. Crystal Ball NaI(Tl) array
 //
 
+#define NICE_EVENT 106
+
 #include "TA2ClusterDetector.h"
 
 // Command-line key words which determine what to read in
@@ -69,7 +71,8 @@ TA2ClusterDetector::TA2ClusterDetector( const char* name,
 
   fDispClusterEnable = kFALSE; // config stuff missing...
   // will be set by child class
-  fDispClusterHitsSingle = NULL;
+  fDispClusterHitsAll    = NULL;
+  fDispClusterHitsSingle = NULL;  
   fDispClusterHitsEnergy = NULL;
 
   fIsPos = ETrue;          // override standard detector, must have position
@@ -306,9 +309,20 @@ void TA2ClusterDetector::DisplayClusters() {
   if(!fDispClusterEnable)
     return;
 
+  if(gAN->GetNEvent()<NICE_EVENT) {
+    return;
+  }
+  else if(gAN->GetNEvent()>NICE_EVENT) {
+    usleep(5e5);
+    return;
+  }
+  // clear histograms
   for(UInt_t i=0;i<fNelement;i++) {
-    fDispClusterHitsSingle->SetElement(i,0);    
-    fDispClusterHitsEnergy->SetElement(i,0);       
+    fDispClusterHitsAll->SetElement(i,0);    
+    fDispClusterHitsEnergy->SetElement(i,0);     
+    for(int i=0;i<MAX_DISP_CLUSTERS;i++) {
+      fDispClusterHitsSingle[i]->SetElement(i,0);           
+    }
   }
   
   for(UInt_t i=0;i<fNhits;i++) {
@@ -318,20 +332,28 @@ void TA2ClusterDetector::DisplayClusters() {
   for(UInt_t i=0;i<fNCluster;i++) {
     HitCluster_t* cl = fCluster[fClustHit[i]];
     UInt_t* hits = cl->GetHits();
+    Double_t* energies = cl->GetEnergies();
     UInt_t nHits = cl->GetNhits();
     for(UInt_t j=0;j<nHits;j++) {
-      Double_t val = fDispClusterHitsSingle->GetElement(hits[j]);
+      Double_t val = fDispClusterHitsAll->GetElement(hits[j]);
       val += 1<<i;
       if(j==0)
         val += 0.1*(i+1);
-      fDispClusterHitsSingle->SetElement(hits[j],val);
+      fDispClusterHitsAll->SetElement(hits[j],val);
+      if(i>=MAX_DISP_CLUSTERS)
+        continue;
+      //Double_t energy = energies[j]<0.1 ? 0 : energies[j];
+      fDispClusterHitsSingle[i]->SetElement(hits[j],energies[j]);      
+      /*cout << "i="<<i<<" j="<<j<<" energy="<<energies[j]
+              <<" hit=" << hits[j]
+              <<endl;*/
     }
   }
   std::stringstream ss;
-  ss << fDispClusterHitsSingle->GetName();
+  ss << fDispClusterHitsAll->GetName();
   ss << " Event=" << gAN->GetNEvent();
   ss << " Clusters=" << fNCluster;
-  fDispClusterHitsSingle->SetTitle(ss.str().c_str());
+  fDispClusterHitsAll->SetTitle(ss.str().c_str());
   //usleep(5e5);
 }
 

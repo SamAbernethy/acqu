@@ -19,6 +19,7 @@
 
 #include "TA2CalArray.h"
 #include <string>
+#include <sstream>
 
 #include <TH2CB.h>
 
@@ -74,10 +75,16 @@ TA2CalArray::TA2CalArray(const char* name, TA2System* apparatus)
 
   // defined in base class TA2ClusterDetector
   std::string s_name(GetName());
-  std::string s_single = s_name + "_ClustersSingle";
-  fDispClusterHitsSingle = new TH2CB(s_single, s_single);
+  std::string s_all = s_name + "_ClustersAll";
+  fDispClusterHitsAll = new TH2CB(s_all, s_all);
   std::string s_energy = s_name + "_ClustersEnergy";
   fDispClusterHitsEnergy = new TH2CB(s_energy, s_energy);
+  fDispClusterHitsSingle = new TH2Crystals*[MAX_DISP_CLUSTERS];
+  for(int i=0;i<MAX_DISP_CLUSTERS;i++) {
+    std::stringstream s_single; 
+    s_single << s_name << "_ClustersSingle_" << i;
+    fDispClusterHitsSingle[i] = new TH2CB(s_single.str(), s_single.str());
+  }
 
 
   AddCmdList(kCalArrayKeys);                  // for SetConfig()

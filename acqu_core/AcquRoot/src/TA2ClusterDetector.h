@@ -32,6 +32,7 @@
 
 
 #include "a2display.h"
+#define MAX_DISP_CLUSTERS 8
 
 
 // constants for command-line maps
@@ -75,8 +76,9 @@ class TA2ClusterDetector : public TA2Detector {
   Bool_t fIsIterate;                    // cluster member find iteration ON/OFF
 
   Bool_t fDispClusterEnable;
-  TH2Crystals* fDispClusterHitsSingle;
-  TH2Crystals* fDispClusterHitsEnergy;  
+  TH2Crystals*  fDispClusterHitsAll;
+  TH2Crystals** fDispClusterHitsSingle;  
+  TH2Crystals*  fDispClusterHitsEnergy;
   void DisplayClusters();
 
  public:
@@ -139,9 +141,7 @@ inline void TA2ClusterDetector::Decode( )
 
   DecodeBasic();
   DecodeCluster();
-
   DisplayClusters();
-
 }
 
 //---------------------------------------------------------------------------
@@ -152,9 +152,7 @@ inline void TA2ClusterDetector::DecodeSaved( )
 
   ReadDecoded();
   DecodeCluster();
-
   DisplayClusters();
-
 }
 
 //---------------------------------------------------------------------------

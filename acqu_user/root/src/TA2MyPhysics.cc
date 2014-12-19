@@ -1400,13 +1400,8 @@ void TA2MyPhysics::Reconstruct()
         fPartCB[nCB]->SetCentralEnergy(cl->GetEnergy()*cl->GetCentralFrac());
         fPartCB[nCB]->SetClusterSize(clNhits);
         fPartCB[nCB]->SetClusterHits(clNhits, clHits);
-        Double_t clHitT[clNhits];
-        for (Int_t j = 0; j < clNhits; j++) 
-        {
-            clHitT[j] = fNaITime[clHits[j]];
-        }
         fPartCB[nCB]->SetClusterHitEnergies(clNhits, cl->GetEnergies());
-        fPartCB[nCB]->SetClusterHitTimes(clNhits, clHitT);
+        fPartCB[nCB]->SetClusterHitTimes(clNhits, cl->GetTimes());
         
         // calculate photon resolutions
         CalculatePhotonResolutions(fPartCB[nCB]);
@@ -1551,13 +1546,8 @@ void TA2MyPhysics::Reconstruct()
         fPartTAPS[nTAPS]->SetCentralEnergy(cl->GetEnergy()*cl->GetCentralFrac());
         fPartTAPS[nTAPS]->SetClusterSize(clNhits);
         fPartTAPS[nTAPS]->SetClusterHits(clNhits, clHits);
-        Double_t clHitT[clNhits];
-        for (Int_t j = 0; j < clNhits; j++) 
-        {
-            clHitT[j] = fBaF2PWOTime[clHits[j]];
-        }
         fPartTAPS[nTAPS]->SetClusterHitEnergies(clNhits, cl->GetEnergies());
-        fPartTAPS[nTAPS]->SetClusterHitTimes(clNhits, clHitT);
+        fPartTAPS[nTAPS]->SetClusterHitTimes(clNhits, cl->GetTimes());
         fPartTAPS[nTAPS]->SetCentralSGEnergy(fBaF2PWO->GetSGEnergy(cl->GetIndex()));
         
         // calculate photon resolutions

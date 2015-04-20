@@ -13,7 +13,7 @@ FileList=$3
 InputDir="/local/raid1/A2/rundata/2014-07_EPT_Prod/"
 
 # Location of output root and log files
-OutputDir="/local/raid1/work/${USER}/analysis/${JobName}"
+OutputDir="/local/raid0/work/${USER}/analysis/${JobName}"
 
 # Who'll get the emails from the farm
 MailAddress="$USER@kph.uni-mainz.de"

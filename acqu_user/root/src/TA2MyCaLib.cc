@@ -13,7 +13,7 @@
 
 #include "TA2MyCaLib.h"
 
-
+#include <limits>
 
 //______________________________________________________________________________
 TA2MyCaLib::TA2MyCaLib(const char* name, TA2Analysis* analysis) 
@@ -189,6 +189,9 @@ TA2MyCaLib::TA2MyCaLib(const char* name, TA2Analysis* analysis)
     // PWO pedestal
     fCalib_PWO_Ped = 0;
     fCalib_PWO_MaxRing = 0;
+
+    taps_time_cut_min = -std::numeric_limits<double>::infinity();
+    taps_time_cut_max =  std::numeric_limits<double>::infinity();
 }
 
 //______________________________________________________________________________
@@ -196,6 +199,10 @@ TA2MyCaLib::~TA2MyCaLib()
 {
     // Destructor.
     
+}
+
+bool TA2MyCaLib::CheckTAPSClusterTime(const TOA2DetParticle* particle) const {
+    return (particle->GetTime() >= taps_time_cut_min && particle->GetTime() <= taps_time_cut_max);
 }
 
 //______________________________________________________________________________
@@ -454,6 +461,11 @@ void TA2MyCaLib::SetConfig(Char_t* line, Int_t key)
             if (sscanf(line, "%d", &fCalib_PWO_Ped) != 1) error = kTRUE;
             if (fCalib_PWO_Ped) fNCalib++;
             break;
+
+        case ECALIB_TAPS_TIME_CUT:
+            if( sscanf(line, "%lf %lf", &taps_time_cut_min, &taps_time_cut_max) != 2) error = kTRUE;
+            break;
+
         default:
             // default parent class SetConfig()
             TA2MyPhysics::SetConfig(line, key);
@@ -509,7 +521,11 @@ void TA2MyCaLib::PostInit()
     }
     if (fCalib_CB_Proton_ECorr) printf("   - CB proton energy correction\n");
     if (fCalib_CBTAPS_LED)  printf("   - CB-TAPS LED\n");
-    if (fCalib_TAPS_Energy) printf("   - TAPS energy\n");
+    if (fCalib_TAPS_Energy) {
+        printf("   - TAPS energy\n");
+        printf("   - Time Cut: %lf - %lf ns\n", taps_time_cut_min, taps_time_cut_max);
+    }
+
     if (fCalib_TAPS_Energy_BG_Subtr)         
     {
         printf("   - TAPS energy (BG. subtr.)\n");
@@ -1514,6 +1530,9 @@ void TA2MyCaLib::ReconstructPhysics()
         // loop over TAPS clusters
         for (UInt_t i = 0; i < fTAPSNCluster; i++)
         {
+            if( !CheckTAPSClusterTime(fPartTAPS[i]))
+                continue;
+
             // calculate 4-vector assuming a photon
             TLorentzVector p4Gamma_1;
             fPartTAPS[i]->Calculate4Vector(&p4Gamma_1, 0);
@@ -1527,7 +1546,7 @@ void TA2MyCaLib::ReconstructPhysics()
 
                 // calculate invariant mass of hit combination
                 Double_t im = (p4Gamma_1 + p4Gamma_2).M();
-                
+
                 // fill invariant mass
                 if (fPartTAPS[i]->GetVetoEnergy() == 0 && fPartCB[j]->GetPIDEnergy() == 0)
                 {
@@ -1541,6 +1560,10 @@ void TA2MyCaLib::ReconstructPhysics()
             // loop over TAPS clusters
             for (UInt_t j = i+1; j < fTAPSNCluster; j++)
             {
+
+                if( !CheckTAPSClusterTime(fPartTAPS[j]))
+                    continue;
+
                 // calculate 4-vector assuming a photon
                 TLorentzVector p4Gamma_2;
                 fPartTAPS[j]->Calculate4Vector(&p4Gamma_2, 0);

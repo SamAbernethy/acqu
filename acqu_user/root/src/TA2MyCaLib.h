@@ -55,7 +55,8 @@ enum {
     ECALIB_PARTICLE_RES,
     ECALIB_BADSCR,
     ECALIB_PWO_CHECK,
-    ECALIB_PWO_PED
+    ECALIB_PWO_PED,
+    ECALIB_TAPS_TIME_CUT
 };
 
 
@@ -93,6 +94,7 @@ static const Map_t myCaLibConfigKeys[] = {
     {"CaLib-BadScalerReads:"          ,   ECALIB_BADSCR               },        // bad scaler reads
     {"CaLib-PWO-Check:"               ,   ECALIB_PWO_CHECK            },        // PWO check
     {"CaLib-PWO-Ped:"                 ,   ECALIB_PWO_PED              },        // PWO pedestal calibration
+    {"CaLib-TAPS-Time-Cut:"           ,   ECALIB_TAPS_TIME_CUT        },        // TAPS Time Cut
     // Termination
     {NULL        , -1           }
 };
@@ -403,6 +405,12 @@ private:
     Int_t fCalib_PWO_MaxRing;                               // maximum ring with PWO crystals
     TH1** fHCalib_PWO_Ped;                                  // raw energy histograms for PWO
     TH1** fHCalib_PWO_Veto_Ped;                             // raw energy histograms for PWO-veto
+
+    // ------------------------------------ Other -------------------------------------------
+    Double_t taps_time_cut_min;                             // TAPS time cut low edge
+    Double_t taps_time_cut_max;                             // TAPS time cut high edge
+
+    bool CheckTAPSClusterTime(const TOA2DetParticle* particle) const;
 
     Int_t GetPIDElementForPhi(Double_t phi);
 

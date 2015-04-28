@@ -1552,8 +1552,8 @@ void TA2MyCaLib::ReconstructPhysics()
                 {
                     fHCalib_TAPS_IM_Neut->Fill(im, fPartTAPS[i]->GetCentralElement());
 
-                    // fill invariant mass for exactly 1 cluster in CB and 1 cluster in TAPS
-                    if (fNNeutral == 2) fHCalib_TAPS_IM_Neut_1CB_1TAPS->Fill(im, fPartTAPS[i]->GetCentralElement());
+                    // fill invariant mass for all combinations of 1 cluster in CB and 1 cluster in TAPS
+                    fHCalib_TAPS_IM_Neut_1CB_1TAPS->Fill(im, fPartTAPS[i]->GetCentralElement());
                 }
             }
             

@@ -192,6 +192,7 @@ TA2MyCaLib::TA2MyCaLib(const char* name, TA2Analysis* analysis)
 
     taps_time_cut_min = -std::numeric_limits<double>::infinity();
     taps_time_cut_max =  std::numeric_limits<double>::infinity();
+    taps_time_cut_sector_element = 1000;
 }
 
 //______________________________________________________________________________
@@ -204,6 +205,11 @@ TA2MyCaLib::~TA2MyCaLib()
 bool TA2MyCaLib::CheckTAPSClusterTime(const TOA2DetParticle* particle) const {
     return (particle->GetTime() >= taps_time_cut_min && particle->GetTime() <= taps_time_cut_max);
 }
+
+UInt_t TA2MyCaLib::GetTAPSSectorElement(const UInt_t elem) {
+    return elem % 72;
+}
+
 
 //______________________________________________________________________________
 void TA2MyCaLib::SetConfig(Char_t* line, Int_t key)
@@ -466,6 +472,10 @@ void TA2MyCaLib::SetConfig(Char_t* line, Int_t key)
             if( sscanf(line, "%lf %lf", &taps_time_cut_min, &taps_time_cut_max) != 2) error = kTRUE;
             break;
 
+        case ECALIB_TAPS_TIME_CUT_S_E:
+            if( sscanf(line, "%d", &taps_time_cut_sector_element) != 1) error = kTRUE;
+            break;
+
         default:
             // default parent class SetConfig()
             TA2MyPhysics::SetConfig(line, key);
@@ -524,6 +534,7 @@ void TA2MyCaLib::PostInit()
     if (fCalib_TAPS_Energy) {
         printf("   - TAPS energy\n");
         printf("   - Time Cut: %lf - %lf ns\n", taps_time_cut_min, taps_time_cut_max);
+        printf("     - for Sector Element Numbers smaller than %d\n", taps_time_cut_sector_element);
     }
 
     if (fCalib_TAPS_Energy_BG_Subtr)         
@@ -1530,7 +1541,7 @@ void TA2MyCaLib::ReconstructPhysics()
         // loop over TAPS clusters
         for (UInt_t i = 0; i < fTAPSNCluster; i++)
         {
-            if( !CheckTAPSClusterTime(fPartTAPS[i]))
+            if( !CheckTAPSClusterTime(fPartTAPS[i]) && (GetTAPSSectorElement(fPartTAPS[i]->GetCentralElement()) <taps_time_cut_sector_element))
                 continue;
 
             // calculate 4-vector assuming a photon
@@ -1561,7 +1572,7 @@ void TA2MyCaLib::ReconstructPhysics()
             for (UInt_t j = i+1; j < fTAPSNCluster; j++)
             {
 
-                if( !CheckTAPSClusterTime(fPartTAPS[j]))
+                if( !CheckTAPSClusterTime(fPartTAPS[j]) && (GetTAPSSectorElement(fPartTAPS[j]->GetCentralElement()) <taps_time_cut_sector_element))
                     continue;
 
                 // calculate 4-vector assuming a photon

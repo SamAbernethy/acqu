@@ -56,7 +56,8 @@ enum {
     ECALIB_BADSCR,
     ECALIB_PWO_CHECK,
     ECALIB_PWO_PED,
-    ECALIB_TAPS_TIME_CUT
+    ECALIB_TAPS_TIME_CUT,
+    ECALIB_TAPS_TIME_CUT_S_E    
 };
 
 
@@ -95,6 +96,7 @@ static const Map_t myCaLibConfigKeys[] = {
     {"CaLib-PWO-Check:"               ,   ECALIB_PWO_CHECK            },        // PWO check
     {"CaLib-PWO-Ped:"                 ,   ECALIB_PWO_PED              },        // PWO pedestal calibration
     {"CaLib-TAPS-Time-Cut:"           ,   ECALIB_TAPS_TIME_CUT        },        // TAPS Time Cut
+    {"CaLib-TAPS-Time-Cut-SectElem:"  ,   ECALIB_TAPS_TIME_CUT_S_E    },        // Apply TAPS Time Cut for Sector Elements smaller than this
     // Termination
     {NULL        , -1           }
 };
@@ -409,8 +411,10 @@ private:
     // ------------------------------------ Other -------------------------------------------
     Double_t taps_time_cut_min;                             // TAPS time cut low edge
     Double_t taps_time_cut_max;                             // TAPS time cut high edge
+    UInt_t   taps_time_cut_sector_element;                  // Max Sector Element for time cut
 
     bool CheckTAPSClusterTime(const TOA2DetParticle* particle) const;
+    static UInt_t GetTAPSSectorElement(const UInt_t elem);
 
     Int_t GetPIDElementForPhi(Double_t phi);
 

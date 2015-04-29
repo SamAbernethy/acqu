@@ -31,15 +31,18 @@
 class TCCalibEnergy : public TCCalib
 {
 
-private:
+protected:
     Double_t fPi0Pos;                   // pi0 position
     TIndicatorLine* fLine;              // indicator line
     
     virtual void Init();
     virtual void Fit(Int_t elem);
     virtual void Calculate(Int_t elem);
+
 protected:
         TH2Crystals* fDetectorView;
+        virtual void initFitFunction() =0;
+
 public:
     TCCalibEnergy() : TCCalib(), fPi0Pos(0), fLine(0) { }
     TCCalibEnergy(const Char_t* name, const Char_t* title, const Char_t* data,
@@ -52,6 +55,8 @@ public:
 
 class TCCalibCBEnergy : public TCCalibEnergy
 {
+protected:
+    virtual void initFitFunction();
     
 public:
     TCCalibCBEnergy()
@@ -68,6 +73,8 @@ public:
 
 class TCCalibTAPSEnergyLG : public TCCalibEnergy
 {
+protected:
+    virtual void initFitFunction();
     
 public:
     TCCalibTAPSEnergyLG()

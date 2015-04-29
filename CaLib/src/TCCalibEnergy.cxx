@@ -129,22 +129,7 @@ void TCCalibEnergy::Fit(Int_t elem)
         if (fPi0Pos < 100 || fPi0Pos > 160) fPi0Pos = 135;
 
         // configure fitting function
-        if (this->InheritsFrom("TCCalibCBEnergy"))
-        {
-            fFitFunc->SetRange(fPi0Pos - 50, fPi0Pos + 80);
-            fFitFunc->SetParameters(fFitHisto->GetMaximum(), fPi0Pos, 8, 1, 1, 1, 0.1);
-            fFitFunc->SetParLimits(1, 130, 140);  
-            fFitFunc->SetParLimits(2, 3, 15);  
-        }
-        else if (this->InheritsFrom("TCCalibTAPSEnergyLG"))
-        {
-	    fFitFunc->SetRange(80, 200);
-       	    fFitFunc->SetParameters(fFitHisto->GetMaximum(), fPi0Pos, 10, 1, 1, 1, 0.1);
-	    fFitFunc->SetParLimits(1, 1, 2000);
-	    fFitFunc->SetParLimits(1, 115, 140);
-	    fFitFunc->SetParLimits(2, 5, 15);
-            fFitFunc->FixParameter(6, 0);
-        }
+        initFitFunction();
 
         // fit
         for (Int_t i = 0; i < 10; i++)
@@ -263,4 +248,24 @@ void TCCalibEnergy::Calculate(Int_t elem)
         printf("Average difference to pi0 mass : %.3f MeV\n", fAvrDiff);
     }
 }   
+
+
+void TCCalibCBEnergy::initFitFunction()
+{
+    fFitFunc->SetRange(fPi0Pos - 50, fPi0Pos + 80);
+    fFitFunc->SetParameters(fFitHisto->GetMaximum(), fPi0Pos, 8, 1, 1, 1, 0.1);
+    fFitFunc->SetParLimits(1, 130, 140);
+    fFitFunc->SetParLimits(2, 3, 15);
+}
+
+void TCCalibTAPSEnergyLG::initFitFunction()
+{
+    fFitFunc->SetRange(80, 200);
+    fFitFunc->SetParameters(fFitHisto->GetMaximum(), fPi0Pos, 10, 1, 1, 1, 0.1);
+    fFitFunc->SetParLimits(1, 1, 2000);
+    fFitFunc->SetParLimits(1, 115, 140);
+    fFitFunc->SetParLimits(2, 5, 15);
+    fFitFunc->FixParameter(6, 0);
+}
+
 ClassImp(TCCalibEnergy)

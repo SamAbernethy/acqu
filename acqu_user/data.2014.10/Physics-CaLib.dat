@@ -27,7 +27,7 @@ Use-CaLib-PID:      1       0       1
 Use-CaLib-Veto:     1       1       0
 
 CaLib-TAPS-Time-Cut: -2.5 2.5
-CaLib-TAPS-Time-Cut-SectElem: 24
+CaLib-TAPS-Time-Cut-MaxRing: 4
 #
 # TA2MyCaLib calibration configuration
 #

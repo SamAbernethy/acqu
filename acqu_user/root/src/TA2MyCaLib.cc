@@ -192,7 +192,7 @@ TA2MyCaLib::TA2MyCaLib(const char* name, TA2Analysis* analysis)
 
     taps_time_cut_min = -std::numeric_limits<double>::infinity();
     taps_time_cut_max =  std::numeric_limits<double>::infinity();
-    taps_time_cut_sector_element = 1000;
+    taps_time_cut_max_ring = 1000;
 }
 
 //______________________________________________________________________________
@@ -472,8 +472,8 @@ void TA2MyCaLib::SetConfig(Char_t* line, Int_t key)
             if( sscanf(line, "%lf %lf", &taps_time_cut_min, &taps_time_cut_max) != 2) error = kTRUE;
             break;
 
-        case ECALIB_TAPS_TIME_CUT_S_E:
-            if( sscanf(line, "%d", &taps_time_cut_sector_element) != 1) error = kTRUE;
+        case ECALIB_TAPS_TIME_CUT_MAXRING:
+            if( sscanf(line, "%d", &taps_time_cut_max_ring) != 1) error = kTRUE;
             break;
 
         default:
@@ -534,7 +534,7 @@ void TA2MyCaLib::PostInit()
     if (fCalib_TAPS_Energy) {
         printf("   - TAPS energy\n");
         printf("   - Time Cut: %lf - %lf ns\n", taps_time_cut_min, taps_time_cut_max);
-        printf("     - for Sector Element Numbers smaller than %d\n", taps_time_cut_sector_element);
+        printf("     - for Ring Numbers smaller than %d\n", taps_time_cut_max_ring);
     }
 
     if (fCalib_TAPS_Energy_BG_Subtr)         
@@ -1541,7 +1541,7 @@ void TA2MyCaLib::ReconstructPhysics()
         // loop over TAPS clusters
         for (UInt_t i = 0; i < fTAPSNCluster; i++)
         {
-            if( !CheckTAPSClusterTime(fPartTAPS[i]) && (GetTAPSSectorElement(fPartTAPS[i]->GetCentralElement()) <taps_time_cut_sector_element))
+            if( !CheckTAPSClusterTime(fPartTAPS[i]) && (TOA2Detector::GetTAPSRing(fPartTAPS[i]->GetCentralElement(), fTAPSType) <= taps_time_cut_max_ring))
                 continue;
 
             // calculate 4-vector assuming a photon
@@ -1572,7 +1572,7 @@ void TA2MyCaLib::ReconstructPhysics()
             for (UInt_t j = i+1; j < fTAPSNCluster; j++)
             {
 
-                if( !CheckTAPSClusterTime(fPartTAPS[j]) && (GetTAPSSectorElement(fPartTAPS[j]->GetCentralElement()) <taps_time_cut_sector_element))
+                if( !CheckTAPSClusterTime(fPartTAPS[j]) && (TOA2Detector::GetTAPSRing(fPartTAPS[j]->GetCentralElement(), fTAPSType) <= taps_time_cut_max_ring))
                     continue;
 
                 // calculate 4-vector assuming a photon

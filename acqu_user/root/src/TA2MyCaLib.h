@@ -413,7 +413,8 @@ private:
     Double_t taps_time_cut_max;                             // TAPS time cut high edge
     Int_t    taps_time_cut_max_ring;                  // Max Sector Element for time cut
 
-    bool CheckTAPSClusterTime(const TOA2DetParticle* particle) const;
+    bool TAPSTimeCutOK(const TOA2DetParticle* particle) const;
+    bool isInnerTAPSArea(const TOA2DetParticle *particle) const;
     static UInt_t GetTAPSSectorElement(const UInt_t elem);
 
     // ------------------------------------           -------------------------------------------

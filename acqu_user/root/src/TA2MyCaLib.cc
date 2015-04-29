@@ -202,8 +202,13 @@ TA2MyCaLib::~TA2MyCaLib()
     
 }
 
-bool TA2MyCaLib::CheckTAPSClusterTime(const TOA2DetParticle* particle) const {
+bool TA2MyCaLib::TAPSTimeCutOK(const TOA2DetParticle* particle) const {
     return (particle->GetTime() >= taps_time_cut_min && particle->GetTime() <= taps_time_cut_max);
+}
+
+bool TA2MyCaLib::isInnerTAPSArea(const TOA2DetParticle* particle) const
+{
+    return TOA2Detector::GetTAPSRing(particle->GetCentralElement(), fTAPSType) <= taps_time_cut_max_ring;
 }
 
 UInt_t TA2MyCaLib::GetTAPSSectorElement(const UInt_t elem) {
@@ -1541,7 +1546,7 @@ void TA2MyCaLib::ReconstructPhysics()
         // loop over TAPS clusters
         for (UInt_t i = 0; i < fTAPSNCluster; i++)
         {
-            if( !CheckTAPSClusterTime(fPartTAPS[i]) && (TOA2Detector::GetTAPSRing(fPartTAPS[i]->GetCentralElement(), fTAPSType) <= taps_time_cut_max_ring))
+            if( !TAPSTimeCutOK(fPartTAPS[i]) && isInnerTAPSArea(fPartTAPS[i]))
                 continue;
 
             // calculate 4-vector assuming a photon
@@ -1563,8 +1568,10 @@ void TA2MyCaLib::ReconstructPhysics()
                 {
                     fHCalib_TAPS_IM_Neut->Fill(im, fPartTAPS[i]->GetCentralElement());
 
-                    // fill invariant mass for all combinations of 1 cluster in CB and 1 cluster in TAPS
-                    fHCalib_TAPS_IM_Neut_1CB_1TAPS->Fill(im, fPartTAPS[i]->GetCentralElement());
+                    // if inner crystal OR 2 neutral hits
+                    if( isInnerTAPSArea(fPartTAPS[i]) || fNNeutral == 2 )
+                        // fill invariant mass for all combinations of 1 cluster in CB and 1 cluster in TAPS
+                        fHCalib_TAPS_IM_Neut_1CB_1TAPS->Fill(im, fPartTAPS[i]->GetCentralElement());
                 }
             }
             
@@ -1572,7 +1579,7 @@ void TA2MyCaLib::ReconstructPhysics()
             for (UInt_t j = i+1; j < fTAPSNCluster; j++)
             {
 
-                if( !CheckTAPSClusterTime(fPartTAPS[j]) && (TOA2Detector::GetTAPSRing(fPartTAPS[j]->GetCentralElement(), fTAPSType) <= taps_time_cut_max_ring))
+                if( !TAPSTimeCutOK(fPartTAPS[j]) && isInnerTAPSArea(fPartTAPS[i]))
                     continue;
 
                 // calculate 4-vector assuming a photon

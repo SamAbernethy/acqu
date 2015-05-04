@@ -114,6 +114,8 @@ void CBEnergy()
     
     // create histogram
     gHOverview = new TH1F("CBEnergy", "CBEnergy", 40000, 0, 40000);
+    gHOverview->SetXTitle("Run Number");
+    gHOverview->SetYTitle("#pi^{0} peak [MeV]");
     TCanvas* cOverview = new TCanvas("CBEnergy", "CBEnergy");
     gHOverview->GetYaxis()->SetRangeUser(yMin, yMax);
     gHOverview->Draw("E1");

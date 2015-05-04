@@ -12,7 +12,7 @@ Reconstruct:
 #
 
 # General:      dbhost     dbname                  dbuser      dbpass        calibration
-Use-CaLib:      blaster    CaLib_2013_10-Present   calib       basel10       2014-07_EPT_Prod_Neiser      
+Use-CaLib:      blaster    CaLib_2013_10-Present   calib       basel10       2014-10_EPT_Prod_Steffen
 #
 #
 # tagger calib:     time    efficiency (0=off/1=on)

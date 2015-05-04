@@ -91,6 +91,8 @@ void CBTime()
     
     // create histogram
     gHOverview = new TH1F("CBTime", "CBTime", 40000, 0, 40000);
+    gHOverview->SetXTitle("Run Number");
+    gHOverview->SetYTitle("CB time [ns]");
     TCanvas* cOverview = new TCanvas("CBTime", "CBTime");
     gHOverview->GetYaxis()->SetRangeUser(yMin, yMax);
     gHOverview->Draw("E1");

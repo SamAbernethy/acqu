@@ -13,6 +13,11 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include "TStyle.h"
+#include "TLine.h"
+#include <iomanip>
+
+
 
 using namespace std;
 
@@ -103,7 +108,7 @@ void IMggAll_vs_runnr()
 	{
 		s << path << "Hist_CBTaggTAPS_" << irunnr << ".root";
 		TString file1 = s.str();
-		f = new TFile( file1 );
+		TFile* f = new TFile( file1 );
 		if(f->IsOpen())
 		{
 			fileNumbers.push_back(irunnr);
@@ -135,7 +140,7 @@ void IMggAll_vs_runnr()
 				count++;
 				s << path << "Hist_CBTaggTAPS_" << *(it+i) << ".root";
 				TString file1 = s.str();
-				f = new TFile( file1 );
+				TFile* f = new TFile( file1 );
 				if(f->IsOpen())
 				{
 					TH2F *rec1 = (TH2F*)f->Get(pathtohist);

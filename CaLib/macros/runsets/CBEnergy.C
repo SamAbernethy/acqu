@@ -210,9 +210,7 @@ void CBEnergy()
     // adjust axis
     gHOverview->GetXaxis()->SetRangeUser(first_run-10, last_run+10);
 
-    TFile* fout = new TFile("runset_overview.root", "update");
-    cOverview->Write();
-    delete fout;
+    gHOverview->SaveAs("Calib_Overview_CBEnergy.root");
 
     printf("%d runs analyzed.\n", nTotRuns);
 

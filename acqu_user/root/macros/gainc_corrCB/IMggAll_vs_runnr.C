@@ -74,7 +74,7 @@ void IMggAll_vs_runnr()
 {
 
 
-	string path = "/home/adlarson/data2014.07/CaLib/iter4/";
+	string path = "analysis/2014-10/root/";
 
 	TString pathtohist = "CaLib_CB_IM";
 	ostringstream s;
@@ -85,8 +85,8 @@ void IMggAll_vs_runnr()
 	prtofileav.open("IMggAll_vs_runnr.dat");
 
 
-	int ifirst_runnr = 4952; 
-	int ilast_runnr = 5905;
+	int ifirst_runnr = 6055; 
+	int ilast_runnr = 6920;
 	int ibinlow = 0;
 	int ibinhigh = 720;
 

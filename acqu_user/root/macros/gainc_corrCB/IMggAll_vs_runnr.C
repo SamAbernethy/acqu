@@ -108,11 +108,11 @@ void IMggAll_vs_runnr()
 	{
 		s << path << "Hist_CBTaggTAPS_" << irunnr << ".root";
 		TString file1 = s.str();
-		TFile* f = new TFile( file1 );
-		if(f->IsOpen())
+		TFile f( file1, "READ" );
+		if(f.IsOpen())
 		{
 			fileNumbers.push_back(irunnr);
-			f->Close();
+			f.Close();
 		}
 		s.str("");
 	}
@@ -140,13 +140,13 @@ void IMggAll_vs_runnr()
 				count++;
 				s << path << "Hist_CBTaggTAPS_" << *(it+i) << ".root";
 				TString file1 = s.str();
-				TFile* f = new TFile( file1 );
-				if(f->IsOpen())
+				TFile f( file1, "READ" );
+				if(f.IsOpen())
 				{
-					TH2F *rec1 = (TH2F*)f->Get(pathtohist);
+					TH2F *rec1 = (TH2F*)f.Get(pathtohist);
 					if(rec1)
 						summedHist->Add(rec1);
-					f->Close();
+					f.Close();
 				}
 				s.str("");
 			}

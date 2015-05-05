@@ -41,7 +41,7 @@ void Fit(Int_t run)
     // configure fitting function
     gFitFunc->SetRange(fPi0Pos - 0.5, fPi0Pos + 0.5);
     gFitFunc->SetLineColor(2);
-    gFitFunc->SetParameters(gH->GetMaximum(), 0, 5);
+    gFitFunc->SetParameters(gH->GetMaximum(), fPi0Pos, .5);
     Int_t fitres = gH->Fit(gFitFunc, "RB0Q");
     
     // get position

@@ -113,6 +113,7 @@ void TCCalibEnergy::Fit(Int_t elem)
     fCanvasFit->cd(2);
     sprintf(tmp, "%s.Histo.Fit", GetName());
     TCUtils::FormatHistogram(fFitHisto, tmp);
+    fFitHisto->GetYaxis()->SetRangeUser(0.0, fFitHisto->GetMaximum()*1.05);
     fFitHisto->Draw("hist");
      
     // check for sufficient statistics
@@ -142,9 +143,8 @@ void TCCalibEnergy::Fit(Int_t elem)
         if (fPi0Pos < 80 || fPi0Pos > 200) fPi0Pos = 135;
  
         // set indicator line
-
         fLine->SetY1(0);
-        fLine->SetupY(0, fFitHisto->GetMaximum() + 20);
+        fLine->SetupY(0, fFitHisto->GetMaximum()*1.05);
         fLine->SetX1(fPi0Pos);
         fLine->SetX2(fPi0Pos);
    

@@ -291,11 +291,11 @@ void TCCalibCBEnergy::initFitFunction()
 
 void TCCalibTAPSEnergyLG::initFitFunction()
 {
-    fFitFunc->SetRange(80, 200);
+    fFitFunc->SetRange(80, 250);
     fFitFunc->SetParameters(fFitHisto->GetMaximum(), fPi0Pos, 10, 1, 1, 1, 0.1);
-    fFitFunc->SetParLimits(1, 1, 2000);
+    fFitFunc->SetParLimits(0, 1, fFitHisto->GetMaximum());
     fFitFunc->SetParLimits(1, 115, 140);
-    fFitFunc->SetParLimits(2, 5, 15);
+    fFitFunc->SetParLimits(2, 5, 50);
     fFitFunc->FixParameter(6, 0);
 }
 

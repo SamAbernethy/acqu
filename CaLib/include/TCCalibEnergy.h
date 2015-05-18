@@ -18,7 +18,7 @@
 
 #include "TCanvas.h"
 #include "TH2.h"
-#include "TLine.h"
+#include "TIndicatorLine.h"
 
 #include "TCCalib.h"
 #include "TCFileManager.h"
@@ -33,7 +33,7 @@ class TCCalibEnergy : public TCCalib
 
 private:
     Double_t fPi0Pos;                   // pi0 position
-    TLine* fLine;                       // indicator line
+    TIndicatorLine* fLine;              // indicator line
     
     virtual void Init();
     virtual void Fit(Int_t elem);

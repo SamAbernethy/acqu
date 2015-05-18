@@ -46,13 +46,10 @@ void TCCalibEnergy::Init()
     Char_t tmp[256];
 
     // init members
+
     fPi0Pos = 0;
-    fLine = new TLine();
+    fLine = new TIndicatorLine();
     
-    // configure line
-    fLine->SetLineColor(4);
-    fLine->SetLineWidth(3);
- 
     // get histogram name
     sprintf(tmp, "%s.Histo.Fit.Name", GetName());
     if (!TCReadConfig::GetReader()->GetConfig(tmp))
@@ -160,8 +157,9 @@ void TCCalibEnergy::Fit(Int_t elem)
         if (fPi0Pos < 80 || fPi0Pos > 200) fPi0Pos = 135;
  
         // set indicator line
+
         fLine->SetY1(0);
-        fLine->SetY2(fFitHisto->GetMaximum() + 20);
+        fLine->SetupY(0, fFitHisto->GetMaximum() + 20);
         fLine->SetX1(fPi0Pos);
         fLine->SetX2(fPi0Pos);
    

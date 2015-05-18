@@ -652,8 +652,9 @@ void TA2MyCaLib::PostInit()
                                         2000, -100, 100, fNelemCB, 0, fNelemCB);
         fHCalib_CB_Time_Neut = new TH2F("CaLib_CB_Time_Neut", "CaLib_CB_Time_Neut;CB neutral cluster time [ns];CB element", 
                                         2000, -100, 100, fNelemCB, 0, fNelemCB);
+        // dt=0.11771 ns
         fHCalib_CB_Time_Ind = new TH2F("CaLib_CB_Time_Ind", "CaLib_CB_Time_Ind;CB neutral cluster time [ns];CB element", 
-                                       10000, -1000, 1000, fNelemCB, 0, fNelemCB);
+                                        16990, -999.94645, 999.94645, fNelemCB, 0, fNelemCB);
     }
     
     // prepare for CB rise time calibration

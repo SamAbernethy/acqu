@@ -42,6 +42,12 @@ protected:
 protected:
         TH2Crystals* fDetectorView;
         virtual void initFitFunction() =0;
+        bool fFitOk;
+        enum {
+            vFitOK =1,
+            vCurrPos =2,
+            vFitFailed=3
+        };
 
 public:
     TCCalibEnergy() : TCCalib(), fPi0Pos(0), fLine(0) { }

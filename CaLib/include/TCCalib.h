@@ -53,6 +53,9 @@ protected:
     TH1* fMainHisto;            // main histogram 
     TH1* fFitHisto;             // fitting histogram
     TF1* fFitFunc;              // fitting function
+    TF1* fFitPeak;
+    TF1* fFitBackGround;
+
 
     TH1* fOverviewHisto;        // overview result histogram
     
@@ -78,7 +81,7 @@ public:
                 fNelem(0), fCurrentElem(0),
                 fOldVal(0), fNewVal(0),
                 fAvr(0), fAvrDiff(0), fNcalc(0),
-                fMainHisto(0), fFitHisto(0), fFitFunc(0),
+                fMainHisto(0), fFitHisto(0), fFitFunc(0), fFitPeak(nullptr), fFitBackGround(nullptr),
                 fOverviewHisto(0),
                 fCanvasFit(0), fCanvasResult(0), 
                 fTimer(0), fTimerRunning(kFALSE) { }
@@ -91,7 +94,7 @@ public:
           fNelem(nElem), fCurrentElem(0),
           fOldVal(0), fNewVal(0),
           fAvr(0), fAvrDiff(0), fNcalc(0),
-          fMainHisto(0), fFitHisto(0), fFitFunc(0),
+          fMainHisto(0), fFitHisto(0), fFitFunc(0), fFitPeak(nullptr), fFitBackGround(nullptr),
           fOverviewHisto(0),
           fCanvasFit(0), fCanvasResult(0), 
           fTimer(0), fTimerRunning(kFALSE), fConvergenceFactor(1) { }

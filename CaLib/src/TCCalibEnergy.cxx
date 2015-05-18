@@ -149,7 +149,31 @@ void TCCalibEnergy::Fit(Int_t elem)
         fLine->SetX2(fPi0Pos);
    
         // draw fitting function
-        if (fFitFunc) fFitFunc->Draw("same");
+        if (fFitFunc) {
+            fFitFunc->Draw("same");
+
+            delete fFitPeak;
+            fFitPeak = new TF1("peak", "gaus(0)", fFitFunc->GetXmin(), fFitFunc->GetXmax());
+            fFitPeak->SetLineColor(kGreen);
+
+            // copy parameters from fit
+            for(int i=0;i<fFitPeak->GetNpar(); ++i) {
+                fFitPeak->SetParameter(i, fFitFunc->GetParameter(i));
+            }
+
+            // background = fit - peak
+            delete fFitBackGround;
+            fFitBackGround = new TF1("bg",Form("%s-peak",fFitFunc->GetName()), fFitFunc->GetXmin(), fFitFunc->GetXmax());
+            fFitBackGround->SetLineColor(kBlue);
+
+            fFitPeak->Draw("same");
+            fFitBackGround->Draw("same");
+
+            //
+            double peak_integral = fFitPeak->Integral(fFitPeak->GetXmin(), fFitPeak->GetXmax(), nullptr);
+            double bg_integral   = fFitBackGround->Integral(fFitBackGround->GetXmin(), fFitBackGround->GetXmax(), nullptr);
+            //double peak_ratio    = peak_integral / bg_integral;
+        }
     
         // draw indicator line
         fLine->Draw();
@@ -158,16 +182,16 @@ void TCCalibEnergy::Fit(Int_t elem)
     double xmin,xmax;
     fFitFunc->GetRange(xmin,xmax);
     double maximum = fFitFunc->GetMaximumX();
-    bool fitok=false;
+    fFitOk=false;
     if(maximum < xmax && maximum > xmin) {
         puts("Fit OK!\n");
-        fitok=true;
+        fFitOk=true;
     } else {
         puts("No Maximum found in fit!");
     }
 
     if(fDetectorView) {
-        fDetectorView->SetElement(elem, fitok ? 1:0);
+        fDetectorView->SetElement(elem, vCurrPos);
         fExtraCanvas->cd();
         fDetectorView->Draw("col");
         fExtraCanvas->Update();
@@ -246,6 +270,13 @@ void TCCalibEnergy::Calculate(Int_t elem)
         fAvrDiff /= (Double_t)fNcalc;
         printf("Average pi0 position           : %.3f MeV\n", fAvr);
         printf("Average difference to pi0 mass : %.3f MeV\n", fAvrDiff);
+    }
+
+    if(fDetectorView) {
+        fDetectorView->SetElement(elem, fFitOk ? vFitOK : vFitFailed);
+        fExtraCanvas->cd();
+        fDetectorView->Draw("col");
+        fExtraCanvas->Update();
     }
 }   
 

@@ -14,7 +14,10 @@
 
 
 #include "CaLibReader_t.h"
+#include <sstream>
+#include <fstream>
 
+using namespace std;
 
 //______________________________________________________________________________
 CaLibReader_t::CaLibReader_t(const Char_t* dbHost, const Char_t* dbName, 
@@ -986,7 +989,57 @@ Bool_t CaLibReader_t::ReadParameters(const Char_t* table, Double_t* par, Int_t l
     delete row;
     delete res;
     
+    // hook here the PerRunCorr
+    return ApplyPerRunCorr(table, par, length);
+}
+
+Bool_t CaLibReader_t::ApplyPerRunCorr(const Char_t* table, Double_t* par, Int_t length) {
+  // check if we find some corresponding gain file 
+  // inside the PerRunCorr folder
+  ifstream corr_file;
+  stringstream corr_filename;
+  corr_filename << "./data/PerRunCorr/enabled/" << table << ".txt"; 
+  corr_file.open(corr_filename.str().c_str());
+  
+  // if the file isn't readable, silently ignore it
+  if(!corr_file.is_open())
     return kTRUE;
+  
+  cout << "Calib/PerRunCorr: Found correction file " << corr_filename.str() << " for Calib table " << table << endl;
+  UInt_t runNumber = gAR->GetRunNumber();
+  // let's find the line starting with the current runNumber in that file
+  string line;
+  while (getline(corr_file,line)) {
+    if(line.empty()) 
+      continue;
+    stringstream s_line(line);
+    // we expect the first number to be the run number
+    UInt_t run;
+    if(!(s_line >> run)) {
+      cerr << "Calib/PerRunCorr: ERROR: Malformed line in file, aborting. " << endl;
+      return kFALSE;
+    }
+    if(runNumber != run)
+      continue;
+    std::vector<double> factors;
+    double factor;
+    while(s_line >> factor) 
+      factors.push_back(factor);
+    if(factors.size() != (size_t)length) {
+      cerr << "Calib/PerRunCorr: ERROR: Found " << factors.size() << " correction factors, expected " << length << endl;
+      return kFALSE;
+    }
+    // finally apply the factors
+    for(Int_t i=0;i<length;i++) {
+      par[i] *= factors[i];
+    }
+    cout << "Calib/PerRunCorr: Successfully corrected " << length << " parameters for run " << runNumber << endl;
+    return kTRUE;
+  }
+  
+  cerr << "Calib/PerRunCorr: ERROR: RunNumber " << runNumber << " not found in file" << endl;
+  
+  return kFALSE;
 }
 
 //______________________________________________________________________________

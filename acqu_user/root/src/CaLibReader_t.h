@@ -71,6 +71,7 @@ private:
 
     Bool_t SearchRunEntry(const Char_t* name, Char_t* out);
     Bool_t ReadParameters(const Char_t* table, Double_t* par, Int_t length);
+    Bool_t ApplyPerRunCorr(const Char_t* table, Double_t* par, Int_t length);
 
     void DisableTAGGcalib();
     void DisableCBcalib();
@@ -118,9 +119,9 @@ public:
     void SetVetoenergy(Bool_t b = kTRUE) { fVetoenergy = b; }
     void SetVetotime(Bool_t b = kTRUE) { fVetotime = b; }
     void SetVetoled(Bool_t b = kTRUE) { fVetoled = b; }
-    void SetBadScRlist(Bool_t b = kTRUE) { fBadScRlist = b; };
-    void SetBadScRfirst(Bool_t b = kTRUE) { fBadScRfirst = b; };
-    void SetBadScRlast(Bool_t b = kTRUE) { fBadScRlast = b; };
+    void SetBadScRlist(Bool_t b = kTRUE) { fBadScRlist = b; }
+    void SetBadScRfirst(Bool_t b = kTRUE) { fBadScRfirst = b; }
+    void SetBadScRlast(Bool_t b = kTRUE) { fBadScRlast = b; }
     
     Bool_t GetTAGGeff() const { return fTAGGeff; }
     Bool_t GetCBquadEnergy() const { return fCBquadEnergy; }
@@ -135,9 +136,9 @@ public:
     Double_t GetTAPSQuadEnergyPar1(Int_t n) const { return fTAPSQuadEnergyPar1[n]; }
     Double_t GetTAPSLED1Thr(Int_t n) const { return fTAPSLED1Thr[n]; }
     Double_t GetTAPSLED2Thr(Int_t n) const { return fTAPSLED2Thr[n]; }
-    Int_t GetTotNScR() const { return fTotNScR; }; 
-    Int_t GetNBadScR() const { return fNBadScR; }; 
-    Int_t* GetBadScR() const { return fBadScR; }; 
+    Int_t GetTotNScR() const { return fTotNScR; } 
+    Int_t GetNBadScR() const { return fNBadScR; } 
+    Int_t* GetBadScR() const { return fBadScR; } 
 
 };
 

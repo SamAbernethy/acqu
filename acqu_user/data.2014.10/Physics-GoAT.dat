@@ -25,7 +25,6 @@ Use-CaLib-PID:      1       0       1
 # Veto calib:       energy  time    LED thr. (0=off/1=on)
 Use-CaLib-Veto:     1       1       0
 
-#Use-CaLib-CBEnergyPerRun: 	data/CBEnergyCorrectionPerRun.txt
 RootTree-Output-Folder:         ~/
 RootTree-File-Name:		Acqu
 

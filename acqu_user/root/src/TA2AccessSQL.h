@@ -40,8 +40,7 @@ enum {
   ESQL_CALIB_CB,
   ESQL_CALIB_TAPS,
   ESQL_CALIB_PID,
-  ESQL_CALIB_VETO,
-  ESQL_CALIB_CBENERGY_PER_RUN
+  ESQL_CALIB_VETO
 };
 
 static const Map_t AccessSQLConfigKeys[] = {
@@ -52,7 +51,6 @@ static const Map_t AccessSQLConfigKeys[] = {
   {"Use-CaLib-TAPS:"               , ESQL_CALIB_TAPS},                     // key for CaLib TAPS configuration
   {"Use-CaLib-PID:"                , ESQL_CALIB_PID},                      // key for CaLib PID configuration
   {"Use-CaLib-Veto:"               , ESQL_CALIB_VETO},                     // key for CaLib Veto configuration
-  {"Use-CaLib-CBEnergyPerRun:"     , ESQL_CALIB_CBENERGY_PER_RUN},         // key for CaLib CBEnergy per Run configuration
   // Termination
   {NULL        , -1           }
 };
@@ -62,9 +60,6 @@ static const Map_t AccessSQLConfigKeys[] = {
 class TA2AccessSQL : public TA2Physics
 {
 private:
-  
-  Bool_t			CBEnergyPerRunCorrection;
-  Double_t		CBEnergyPerRunCorrectionFactor;
   
   void	LoadDetectors(TA2DataManager* parent, Int_t depth);
   void 	ApplyCaLib();

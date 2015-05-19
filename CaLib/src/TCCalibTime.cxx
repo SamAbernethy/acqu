@@ -16,7 +16,6 @@
 #include "TCCalibTime.h"
 
 
-
 //______________________________________________________________________________
 TCCalibTime::TCCalibTime(const Char_t* name, const Char_t* title, const Char_t* data,
                          Int_t nElem)
@@ -49,12 +48,8 @@ void TCCalibTime::Init()
 
     // init members
     fMean = 0;
-    fLine = new TLine();
+    fLine = new TIndicatorLine();
     
-    // configure line
-    fLine->SetLineColor(4);
-    fLine->SetLineWidth(3);
- 
     // get histogram name
     sprintf(tmp, "%s.Histo.Fit.Name", GetName());
     if (!TCReadConfig::GetReader()->GetConfig(tmp))
@@ -216,10 +211,8 @@ void TCCalibTime::Fit(Int_t elem)
         fMean = fFitFunc->GetParameter(3); 
 
         // draw mean indicator line
-        fLine->SetY1(0);
-        fLine->SetY2(fFitHisto->GetMaximum() + 20);
+        fLine->SetupY(0,fFitHisto->GetMaximum() + 20);
         fLine->SetX1(fMean);
-        fLine->SetX2(fMean);
    
         // draw fitting function
         if (fFitFunc) fFitFunc->Draw("same");

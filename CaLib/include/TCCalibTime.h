@@ -23,6 +23,7 @@
 #include "TCCalib.h"
 #include "TCFileManager.h"
 
+#include "TIndicatorLine.h"
 
 class TCCalibTime : public TCCalib
 {
@@ -30,7 +31,7 @@ class TCCalibTime : public TCCalib
 private:
     Double_t* fTimeGain;                // TDC gain array
     Double_t fMean;                     // mean time position
-    TLine* fLine;                       // indicator line
+    TIndicatorLine* fLine;                       // indicator line
     
     virtual void Init();
     virtual void Fit(Int_t elem);

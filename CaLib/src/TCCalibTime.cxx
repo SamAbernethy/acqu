@@ -294,6 +294,27 @@ void TCCalibTime::Calculate(Int_t elem)
     }
 }
 
+double sqr(const double& x) { return x*x; }
+
+double asymGaus(double* xarr, double* p) {
+    double& x  = xarr[0];
+
+    double& a  = p[0];
+    double& x0 = p[1];
+    double& s = (x<x0 ? p[2] : p[3]);
+
+    return a * exp(- sqr(x-x0)/sqr(s) );
+}
+
+TF1* makeAsymGaus(const char* name="ag") {
+    TF1* f = new TF1(name, asymGaus, -10, 10, 4);
+    f->SetParameter(0,1);
+    f->SetParameter(1,1);
+    f->SetParameter(2,1);
+    f->SetParameter(3,4);
+
+    return f;
+}
 
 void TCCalibCBTime::Fit(Int_t elem)
 {
@@ -321,42 +342,40 @@ void TCCalibCBTime::Fit(Int_t elem)
     // check for sufficient statistics
     if (fFitHisto->GetEntries())
     {
+        // get important parameter positions
+        Double_t fMean = fFitHisto->GetXaxis()->GetBinCenter(fFitHisto->GetMaximumBin());
+        Double_t max = fFitHisto->GetBinContent(fFitHisto->GetMaximumBin());
+
         // delete old function
         if (fFitFunc) delete fFitFunc;
         sprintf(tmp, "fTime_%i", elem);
 
         // the fit function
-        fFitFunc = new TF1("fFitFunc", "pol1(0)+gaus(2)");
-        fFitFunc->SetLineColor(2);
+        TF1* tmpfit = new TF1("tmpfit", asymGaus, fMean - range, fMean + range, 4);
+        tmpfit->SetLineColor(2);
 
-        // get important parameter positions
-        Double_t fMean = fFitHisto->GetXaxis()->GetBinCenter(fFitHisto->GetMaximumBin());
-        Double_t max = fFitHisto->GetBinContent(fFitHisto->GetMaximumBin());
+        tmpfit->SetParLimits(0, 0, max*10.0);
+        tmpfit->SetParameter(0, max);
 
-        // configure fitting function
-        fFitFunc->SetParameters(1, 0.1, max, fMean, 8);
-        fFitFunc->SetParLimits(2, 0.1, max*10);
-        fFitFunc->SetParLimits(3, fMean - 2, fMean + 2);
-        fFitFunc->SetParLimits(4, 0, 20);
+        tmpfit->SetParameter(1, fMean);
+        tmpfit->SetParameter(2, 5);
+        tmpfit->SetParameter(3, 5);
+        tmpfit->SetParLimits(2, 0, 50);
+        tmpfit->SetParLimits(3, 0, 50);
 
-        // only gaussian
-        fFitFunc->FixParameter(0, 0);
-        fFitFunc->FixParameter(1, 0);
+        fFitHisto->Fit(tmpfit, "RBQ0");
+        fMean = tmpfit->GetParameter(1);
+        double sl = tmpfit->GetParameter(2);
+        double sr = tmpfit->GetParameter(3);
+        delete tmpfit;
+
+        fFitFunc = new TF1("fFitFunc","pol4");
 
 
         // first iteration
-        fFitFunc->SetRange(fMean - range, fMean + range);
+        fFitFunc->SetRange(fMean - sl, fMean + sr);
         fFitHisto->Fit(fFitFunc, "RBQ0");
-        fMean = fFitFunc->GetParameter(3);
-
-        // second iteration
-        Double_t sigma = fFitFunc->GetParameter(4);
-        fFitFunc->SetRange(fMean -factor*sigma, fMean +factor*sigma);
-        for (Int_t i = 0; i < 10; i++)
-            if(!fFitHisto->Fit(fFitFunc, "RBQ0")) break;
-
-        // final results
-        fMean = fFitFunc->GetParameter(3);
+        fMean = fFitFunc->GetMaximumX();
 
         // draw mean indicator line
         fLine->SetupY(0,fFitHisto->GetMaximum() + 20);

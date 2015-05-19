@@ -58,6 +58,9 @@ init_values()
 #  Function to set the command line options
 function set_option {
  	case $1 in
+        R)
+            resubmit=1
+            ;;
 	    m)
 	    maxq="${OPTARG}" ;;
 	    s)
@@ -80,7 +83,7 @@ fi
 init_values;
 
 #parse the command options and set variables accordingly
-while getopts "m:s:r" opt ; do 
+while getopts "m:s:r:R" opt ; do 
     set_option $opt  
 done
 shift $[$OPTIND-1]
@@ -104,6 +107,12 @@ else
 fi
 
 #loop over all files in ${dir}/allsubs.dat
+
+if [ "$resubmit" == "1" ]; then
+    echo "Resubmitting"
+    rm ${dir}/*.done
+    rm ${dir}/Acqu_*
+fi
 
 while read subfile
 do

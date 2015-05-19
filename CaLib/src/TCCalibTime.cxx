@@ -293,4 +293,92 @@ void TCCalibTime::Calculate(Int_t elem)
         printf("Average difference to 0 : %.3f ns\n", fAvrDiff);
     }
 }
+
+
+void TCCalibCBTime::Fit(Int_t elem)
+{
+    // Perform the fit of the element 'elem'.
+
+    Char_t tmp[256];
+
+    // create histogram projection for this element
+    sprintf(tmp, "ProjHisto_%i", elem);
+    TH2* h2 = (TH2*) fMainHisto;
+    if (fFitHisto) delete fFitHisto;
+    fFitHisto = (TH1D*) h2->ProjectionX(tmp, elem+1, elem+1, "e");
+
+    // init variables
+    Double_t factor = 2.5;
+    Double_t range = 3.8;
+
+    // draw histogram
+    fFitHisto->SetFillColor(35);
+    fCanvasFit->cd(2);
+    sprintf(tmp, "%s.Histo.Fit", GetName());
+    TCUtils::FormatHistogram(fFitHisto, tmp);
+    fFitHisto->Draw("hist");
+
+    // check for sufficient statistics
+    if (fFitHisto->GetEntries())
+    {
+        // delete old function
+        if (fFitFunc) delete fFitFunc;
+        sprintf(tmp, "fTime_%i", elem);
+
+        // the fit function
+        fFitFunc = new TF1("fFitFunc", "pol1(0)+gaus(2)");
+        fFitFunc->SetLineColor(2);
+
+        // get important parameter positions
+        Double_t fMean = fFitHisto->GetXaxis()->GetBinCenter(fFitHisto->GetMaximumBin());
+        Double_t max = fFitHisto->GetBinContent(fFitHisto->GetMaximumBin());
+
+        // configure fitting function
+        fFitFunc->SetParameters(1, 0.1, max, fMean, 8);
+        fFitFunc->SetParLimits(2, 0.1, max*10);
+        fFitFunc->SetParLimits(3, fMean - 2, fMean + 2);
+        fFitFunc->SetParLimits(4, 0, 20);
+
+        // only gaussian
+        fFitFunc->FixParameter(0, 0);
+        fFitFunc->FixParameter(1, 0);
+
+
+        // first iteration
+        fFitFunc->SetRange(fMean - range, fMean + range);
+        fFitHisto->Fit(fFitFunc, "RBQ0");
+        fMean = fFitFunc->GetParameter(3);
+
+        // second iteration
+        Double_t sigma = fFitFunc->GetParameter(4);
+        fFitFunc->SetRange(fMean -factor*sigma, fMean +factor*sigma);
+        for (Int_t i = 0; i < 10; i++)
+            if(!fFitHisto->Fit(fFitFunc, "RBQ0")) break;
+
+        // final results
+        fMean = fFitFunc->GetParameter(3);
+
+        // draw mean indicator line
+        fLine->SetupY(0,fFitHisto->GetMaximum() + 20);
+        fLine->SetX1(fMean);
+
+        // draw fitting function
+        if (fFitFunc) fFitFunc->Draw("same");
+
+        // draw indicator line
+        fLine->Draw();
+    }
+
+    // update canvas
+    fCanvasFit->Update();
+
+    // update overview
+    if (elem % 20 == 0)
+    {
+        fCanvasResult->cd();
+        fOverviewHisto->Draw("E1");
+        fCanvasResult->Update();
+    }
+}
+
 ClassImp(TCCalibTime)

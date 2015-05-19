@@ -28,7 +28,7 @@
 class TCCalibTime : public TCCalib
 {
 
-private:
+protected:
     Double_t* fTimeGain;                // TDC gain array
     Double_t fMean;                     // mean time position
     TIndicatorLine* fLine;                       // indicator line
@@ -70,6 +70,8 @@ public:
                      "Data.CB.T0",
                      TCConfig::kMaxCB) { }
     virtual ~TCCalibCBTime() { }
+
+    virtual void Fit(Int_t elem);
     
     ClassDef(TCCalibCBTime, 0) // CB time calibration class
 };

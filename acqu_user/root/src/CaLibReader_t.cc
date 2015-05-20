@@ -1009,36 +1009,82 @@ Bool_t CaLibReader_t::ApplyPerRunCorr(const Char_t* table, Double_t* par, Int_t 
   UInt_t runNumber = gAR->GetRunNumber();
   // let's find the line starting with the current runNumber in that file
   string line;
+  
+  bool applyWithMultiplyOrAdd = false; // default apply correction value with multiply 
+  unsigned n_lines = 0;
   while (getline(corr_file,line)) {
+    // ignore empty lines
     if(line.empty()) 
       continue;
+    n_lines++;
+       
+    // check if first line is config line, i.e. starts with "#"
+    if(n_lines==1 && line.find("#") == 0) {
+      line = line.substr(1);
+      stringstream s_line(line);
+      string config;
+      while(s_line >> config) {
+        // try to split config
+        size_t n = config.find("=");
+        if(n == string::npos) {
+          cerr << "Calib/PerRunCorr: ERROR: invalid first config line, no = found in statement " << config << endl;
+          return kFALSE;
+        }
+        string config_par = config.substr(0, n);
+        string config_val = config.substr(n+1);
+        if(config_par == "applywith") {
+          if(config_val == "add") {
+            applyWithMultiplyOrAdd = true;
+          }
+          else if(config_val == "multiply") {
+            applyWithMultiplyOrAdd = false;
+          }
+          else {
+            cerr << "Calib/PerRunCorr: ERROR: Config value " << config_val << " not recognized for " << config_par << endl;
+            return kFALSE;
+          }
+        }
+        else {
+          cerr << "Calib/PerRunCorr: ERROR: Config parameter " << config_par << " not recognized" << endl;
+          return kFALSE;
+        }
+      }
+      continue;
+    }
+    
+    // from here, the lines should always represent a run-dependent set of factors
     stringstream s_line(line);
+    
     // we expect the first number to be the run number
     UInt_t run;
     if(!(s_line >> run)) {
-      cerr << "Calib/PerRunCorr: ERROR: Malformed line in file, aborting. " << endl;
+      cerr << "Calib/PerRunCorr: ERROR: Malformed line " << n_lines << " in file, aborting. " << endl;
       return kFALSE;
     }
     if(runNumber != run)
       continue;
-    std::vector<double> factors;
-    double factor;
-    while(s_line >> factor) 
-      factors.push_back(factor);
-    if(factors.size() != (size_t)length) {
-      cerr << "Calib/PerRunCorr: ERROR: Found " << factors.size() << " correction factors, expected " << length << endl;
+    std::vector<double> corr_params;
+    double corr_param;
+    while(s_line >> corr_param) 
+      corr_params.push_back(corr_param);
+    if(corr_params.size() != (size_t)length) {
+      cerr << "Calib/PerRunCorr: ERROR: Found " << corr_params.size() << " correction parameters, expected " << length << endl;
       return kFALSE;
     }
     // finally apply the factors
     for(Int_t i=0;i<length;i++) {
-      par[i] *= factors[i];
+      if(applyWithMultiplyOrAdd) {
+        par[i] += corr_params[i];
+      }
+      else {
+        par[i] *= corr_params[i];
+      }      
     }
     cout << "Calib/PerRunCorr: Successfully corrected " << length << " parameters for run " << runNumber << endl;
     return kTRUE;
   }
   
   cerr << "Calib/PerRunCorr: ERROR: RunNumber " << runNumber << " not found in file" << endl;
-  
   return kFALSE;
 }
 

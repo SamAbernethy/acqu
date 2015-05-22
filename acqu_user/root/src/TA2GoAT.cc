@@ -304,26 +304,41 @@ void    TA2GoAT::PostInit()
 	treeTrigger->Branch("nTriggerPattern", &nTriggerPattern, "nTriggerPattern/I");
     treeTrigger->Branch("triggerPattern", triggerPattern, "triggerPattern[nTriggerPattern]/I");
 	
-    treeDetectorHits->Branch("nNaIHits", &nNaIHits, "nNaIHits/I");
-    treeDetectorHits->Branch("NaIHits", NaIHits, "NaIHits[nNaIHits]/I");
-    treeDetectorHits->Branch("NaICluster", NaICluster, "NaICluster[nNaIHits]/I");
-    treeDetectorHits->Branch("NaIEnergy", NaIEnergy, "NaIEnergy[nNaIHits]/D");
-    treeDetectorHits->Branch("NaITime", NaITime, "NaITime[nNaIHits]/D");
-    treeDetectorHits->Branch("nPIDHits", &nPIDHits, "nPIDHits/I");
-    treeDetectorHits->Branch("PIDHits", PIDHits, "PIDHits[nPIDHits]/I");
-    treeDetectorHits->Branch("PIDEnergy", PIDEnergy, "PIDEnergy[nPIDHits]/D");
-    treeDetectorHits->Branch("PIDTime", PIDTime, "PIDTime[nPIDHits]/D");
-    treeDetectorHits->Branch("nMWPCHits", &nMWPCHits, "nMWPCHits/I");
-    treeDetectorHits->Branch("MWPCHits", MWPCHits, "MWPCHits[nMWPCHits]/I");
-    treeDetectorHits->Branch("nBaF2Hits", &nBaF2Hits, "nBaF2Hits/I");
-    treeDetectorHits->Branch("BaF2Hits", BaF2Hits, "BaF2Hits[nBaF2Hits]/I");
-    treeDetectorHits->Branch("BaF2Cluster", BaF2Cluster, "BaF2Cluster[nBaF2Hits]/I");
-    treeDetectorHits->Branch("BaF2Energy", BaF2Energy, "BaF2Energy[nBaF2Hits]/D");
-    treeDetectorHits->Branch("BaF2Time", BaF2Time, "BaF2Time[nBaF2Hits]/D");
-    treeDetectorHits->Branch("nVetoHits", &nVetoHits, "nVetoHits/I");
-    treeDetectorHits->Branch("VetoHits", VetoHits, "VetoHits[nVetoHits]/I");
-    treeDetectorHits->Branch("VetoEnergy", VetoEnergy, "VetoEnergy[nVetoHits]/D");
-    treeDetectorHits->Branch("VetoTime", VetoTime, "VetoTime[nVetoHits]/D");
+    if(fNaI)
+    {
+        treeDetectorHits->Branch("nNaIHits", &nNaIHits, "nNaIHits/I");
+        treeDetectorHits->Branch("NaIHits", NaIHits, "NaIHits[nNaIHits]/I");
+        treeDetectorHits->Branch("NaICluster", NaICluster, "NaICluster[nNaIHits]/I");
+        if(fNaI->IsEnergy()) treeDetectorHits->Branch("NaIEnergy", NaIEnergy, "NaIEnergy[nNaIHits]/D");
+        if(fNaI->IsTime()) treeDetectorHits->Branch("NaITime", NaITime, "NaITime[nNaIHits]/D");
+    }
+    if(fPID)
+    {
+        treeDetectorHits->Branch("nPIDHits", &nPIDHits, "nPIDHits/I");
+        treeDetectorHits->Branch("PIDHits", PIDHits, "PIDHits[nPIDHits]/I");
+        if(fPID->IsEnergy()) treeDetectorHits->Branch("PIDEnergy", PIDEnergy, "PIDEnergy[nPIDHits]/D");
+        if(fPID->IsTime()) treeDetectorHits->Branch("PIDTime", PIDTime, "PIDTime[nPIDHits]/D");
+    }
+    if(fMWPC)
+    {
+        treeDetectorHits->Branch("nMWPCHits", &nMWPCHits, "nMWPCHits/I");
+        treeDetectorHits->Branch("MWPCHits", MWPCHits, "MWPCHits[nMWPCHits]/I");
+    }
+    if(fBaF2PWO)
+    {
+        treeDetectorHits->Branch("nBaF2Hits", &nBaF2Hits, "nBaF2Hits/I");
+        treeDetectorHits->Branch("BaF2Hits", BaF2Hits, "BaF2Hits[nBaF2Hits]/I");
+        treeDetectorHits->Branch("BaF2Cluster", BaF2Cluster, "BaF2Cluster[nBaF2Hits]/I");
+        if(fBaF2PWO->IsEnergy()) treeDetectorHits->Branch("BaF2Energy", BaF2Energy, "BaF2Energy[nBaF2Hits]/D");
+        if(fBaF2PWO->IsTime()) treeDetectorHits->Branch("BaF2Time", BaF2Time, "BaF2Time[nBaF2Hits]/D");
+    }
+    if(fVeto)
+    {
+        treeDetectorHits->Branch("nVetoHits", &nVetoHits, "nVetoHits/I");
+        treeDetectorHits->Branch("VetoHits", VetoHits, "VetoHits[nVetoHits]/I");
+        if(fVeto->IsEnergy()) treeDetectorHits->Branch("VetoEnergy", VetoEnergy, "VetoEnergy[nVetoHits]/D");
+        if(fVeto->IsTime()) treeDetectorHits->Branch("VetoTime", VetoTime, "VetoTime[nVetoHits]/D");
+    }
 
     if(fNaI && fMWPC)
     {
@@ -850,8 +865,8 @@ void    TA2GoAT::Reconstruct()
 		{
             NaIHits[i] = fNaI->GetHits(i);
             NaICluster[i] = clindex[NaIHits[i]];
-            NaIEnergy[i] = fNaI->GetEnergy(NaIHits[i]);
-            NaITime[i] = fNaI->GetTime(NaIHits[i]);
+            if(fNaI->IsEnergy()) NaIEnergy[i] = fNaI->GetEnergy(NaIHits[i]);
+            if(fNaI->IsTime()) NaITime[i] = fNaI->GetTime(NaIHits[i]);
         }
 	}
 
@@ -861,8 +876,8 @@ void    TA2GoAT::Reconstruct()
         for(Int_t i=0; i<nPIDHits; i++)
         {
             PIDHits[i] = fPID->GetHits(i);
-            PIDEnergy[i] = fPID->GetEnergy(PIDHits[i]);
-            PIDTime[i] = fPID->GetTime(PIDHits[i]);
+            if(fPID->IsEnergy()) PIDEnergy[i] = fPID->GetEnergy(PIDHits[i]);
+            if(fPID->IsTime()) PIDTime[i] = fPID->GetTime(PIDHits[i]);
         }
 	}
 
@@ -895,8 +910,8 @@ void    TA2GoAT::Reconstruct()
 		{
             BaF2Hits[i] = fBaF2PWO->GetHits(i);
             BaF2Cluster[i] = clindex[BaF2Hits[i]];
-            BaF2Energy[i] = fBaF2PWO->GetEnergy(BaF2Hits[i]);
-            BaF2Time[i] = fBaF2PWO->GetTime(BaF2Hits[i]);
+            if(fBaF2PWO->IsEnergy()) BaF2Energy[i] = fBaF2PWO->GetEnergy(BaF2Hits[i]);
+            if(fBaF2PWO->IsTime()) BaF2Time[i] = fBaF2PWO->GetTime(BaF2Hits[i]);
         }
 	}
 
@@ -906,8 +921,8 @@ void    TA2GoAT::Reconstruct()
         for(Int_t i=0; i<nVetoHits; i++)
         {
             VetoHits[i] = fVeto->GetHits(i);
-            VetoEnergy[i] = fVeto->GetEnergy(VetoHits[i]);
-            VetoTime[i] = fVeto->GetTime(VetoHits[i]);
+            if(fVeto->IsEnergy()) VetoEnergy[i] = fVeto->GetEnergy(VetoHits[i]);
+            if(fVeto->IsTime()) VetoTime[i] = fVeto->GetTime(VetoHits[i]);
         }
 	}
 

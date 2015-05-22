@@ -392,8 +392,8 @@ void    TA2GoAT::PostInit()
     if (gAR->GetProcessType() == EMCProcess)
     {
         // Store MC event id for MC process
-        treeTrigger->Branch("mc_evt_id", &MCEventID, "mc_event_id/L");
-        treeTrigger->Branch("mc_rnd_id", &MCRndID, "mc_rnd_id/L");
+        if(EI_mc_evt_id < gAR->GetNbranch()) treeTrigger->Branch("mc_evt_id", &MCEventID, "mc_event_id/L");
+        if(EI_mc_rnd_id < gAR->GetNbranch()) treeTrigger->Branch("mc_rnd_id", &MCRndID, "mc_rnd_id/L");
     }
 
     // Adding Tagger information to parameters tree
@@ -683,9 +683,9 @@ void    TA2GoAT::Reconstruct()
 	// Fill standard data check histograms
 	DataCheckHistograms();
 
-    if(gAR->GetProcessType() == EMCProcess ) {
-        MCEventID = *(Long64_t*) (fEvent[EI_mc_evt_id]);
-        MCRndID   = *(Long64_t*) (fEvent[EI_mc_rnd_id]);
+    if(gAR->GetProcessType() == EMCProcess ) { 
+        if(EI_mc_evt_id < gAR->GetNbranch()) MCEventID = *(Long64_t*) (fEvent[EI_mc_evt_id]);
+        if(EI_mc_rnd_id < gAR->GetNbranch()) MCRndID   = *(Long64_t*) (fEvent[EI_mc_rnd_id]);
     }
 
 	// Output scaler info on scaler read events

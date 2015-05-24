@@ -1322,21 +1322,6 @@ void TA2MyCaLib::ReconstructPhysics()
             Double_t* g2_energy = decay_photons[1]->GetClusterHitEnergies();
             Double_t* g2_time   = decay_photons[1]->GetClusterHitTimes();
             
-            // regard the tagger as "disabled" if Prompt_Min>Prompt_Max
-            // then just fill in the reconstructed two gamma event
-            // this is useful when using the Endpoint Tagger
-            if(fCalib_CB_Walk_Prompt_Min > fCalib_CB_Walk_Prompt_Max) {
-              // fill energies and times of all elements of the photon cluster 1
-              for (Int_t j = 0; j < g1_nhits; j++) 
-                  fHCalib_CB_Walk_E_T[g1_hits[j]]->Fill(g1_energy[j], g1_time[j]);
-          
-              // fill energies and times of all elements of the photon cluster 2
-              for (Int_t j = 0; j < g2_nhits; j++) 
-                  fHCalib_CB_Walk_E_T[g2_hits[j]]->Fill(g2_energy[j], g2_time[j]);              
-              
-              goto label_end_cb_timewalk;
-            }
-            
             // target 4-vector
             TLorentzVector p4Target(0., 0., 0., TOGlobals::kProtonMass);
         

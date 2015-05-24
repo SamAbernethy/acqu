@@ -66,6 +66,13 @@ TA2MyCaLib::TA2MyCaLib(const char* name, TA2Analysis* analysis)
     fCalib_CB_Walk_MM_Min     = 0;
     fCalib_CB_Walk_MM_Max     = 0;
 
+    // CB time walk calibration for EPT
+    fCalib_CB_Walk_EPT            = 0;
+    fCalib_CB_Walk_EPT_Pi0_Min    = 0;
+    fCalib_CB_Walk_EPT_Pi0_Max    = 0;
+    fCalib_CB_Walk_EPT_Phi_Min    = 0;
+    fCalib_CB_Walk_EPT_Phi_Max    = 0;
+
     // CB proton energy correction
     fCalib_CB_Proton_ECorr = 0;
 
@@ -264,6 +271,15 @@ void TA2MyCaLib::SetConfig(Char_t* line, Int_t key)
                        &fCalib_CB_Walk_MM_Min,     &fCalib_CB_Walk_MM_Max) != 11) error = kTRUE;
             if (fCalib_CB_Walk) fNCalib++;
             break;
+        case ECALIB_CB_WALK_EPT:
+            // Enable CB time walk calibration for EPT
+            if (sscanf(line, "%d%lf%lf%lf%lf",
+                       &fCalib_CB_Walk_EPT,
+                       &fCalib_CB_Walk_EPT_Pi0_Min, &fCalib_CB_Walk_EPT_Pi0_Max,
+                       &fCalib_CB_Walk_EPT_Phi_Min, &fCalib_CB_Walk_EPT_Phi_Max) != 5) error = kTRUE;
+            if (fCalib_CB_Walk_EPT) fNCalib++;
+            break;
+
         case ECALIB_CB_PROTON_ECORR:
             // Enable CB proton energy correction
             if (sscanf(line, "%d", &fCalib_CB_Proton_ECorr) != 1) error = kTRUE;
@@ -534,6 +550,12 @@ void TA2MyCaLib::PostInit()
         printf("     -> Random subtraction BG 1    : %8.2f to %8.2f ns\n", fCalib_CB_Walk_BG1_Min, fCalib_CB_Walk_BG1_Max);
         printf("     -> Random subtraction BG 2    : %8.2f to %8.2f ns\n", fCalib_CB_Walk_BG2_Min, fCalib_CB_Walk_BG2_Max);
     }
+    if (fCalib_CB_Walk_EPT)
+    {
+        printf("   - CB time walk for EPT\n");
+        printf("     -> pi0 invariant mass cut     : %8.2f to %8.2f MeV\n", fCalib_CB_Walk_EPT_Pi0_Min, fCalib_CB_Walk_EPT_Pi0_Max);
+        printf("     -> pi0/proton phi cut         : %8.2f to %8.2f MeV\n", fCalib_CB_Walk_EPT_Phi_Min, fCalib_CB_Walk_EPT_Phi_Max);
+    }
     if (fCalib_CB_Proton_ECorr) printf("   - CB proton energy correction\n");
     if (fCalib_CBTAPS_LED)  printf("   - CB-TAPS LED\n");
     if (fCalib_TAPS_Energy) {
@@ -683,7 +705,25 @@ void TA2MyCaLib::PostInit()
             fHCalib_CB_Walk_E_T[i] = new TH2F(name, title, 400, 0, 400, 300, -100, 200);
         }
     }
-    
+
+    // prepare for CB time walk for EPT calibration
+    if (fCalib_CB_Walk_EPT)
+    {
+        fHCalib_CB_Walk_EPT_IM           = new TH1F("CaLib_CB_Walk_EPT_IM", "CaLib_CB_Walk_EPT_IM;2#gamma invariant mass [MeV];Counts",
+                                                1000, 0, 1000);
+        fHCalib_CB_Walk_EPT_Phi          = new TH1F("CaLib_CB_Walk_EPT_Phi", "CaLib_CB_Walk_EPT_Phi;pi0/proton phi diff;Counts",
+                                                1080, 0, 360);
+
+        fHCalib_CB_Walk_EPT_E_T = new TH2*[fNelemCB];
+
+        for (Int_t i = 0; i < fNelemCB; i++)
+        {
+            sprintf(name, "CaLib_CB_Walk_EPT_E_T_%03d", i);
+            sprintf(title, "CaLib_CB_Walk_EPT_E_T_%03d;CB energy [MeV];CB time [ns]", i);
+            fHCalib_CB_Walk_EPT_E_T[i] = new TH2F(name, title, 400, 0, 400, 300, -100, 200);
+        }
+    }
+
     // prepare for CB proton energy correction
     if (fCalib_CB_Proton_ECorr)
     {
@@ -1315,8 +1355,8 @@ void TA2MyCaLib::ReconstructPhysics()
             UInt_t* g1_hits     = decay_photons[0]->GetClusterHits();
             Double_t* g1_energy = decay_photons[0]->GetClusterHitEnergies();
             Double_t* g1_time   = decay_photons[0]->GetClusterHitTimes();
-            
-            // photon 1 cluster properties
+
+            // photon 2 cluster properties
             Int_t g2_nhits      = decay_photons[1]->GetClusterSize();
             UInt_t* g2_hits     = decay_photons[1]->GetClusterHits();
             Double_t* g2_energy = decay_photons[1]->GetClusterHitEnergies();
@@ -1374,10 +1414,61 @@ void TA2MyCaLib::ReconstructPhysics()
 
     } // end CB time walk
     label_end_cb_timewalk:
-    
-    
-    // --------------------------- CB proton energy correction ---------------------------- 
-    
+
+    // ----------------------------------- CB time walk for EPT -----------------------------------
+
+    if (fCalib_CB_Walk_EPT)
+    {
+        // Clear the time walk parameters before analyzing
+        if (fEventCounter == 0) ClearCBTimeWalk();
+
+        // look for two neutral hits and one charged in CB
+        if (!(fNNeutral == 2 && fCBNCluster == 3 && fNCharged == 1))
+            goto label_end_cb_timewalk_ept;
+
+        // reconstruct pi0
+        TOA2RecMeson2g pi0(fNNeutral, TOGlobals::kPi0Mass);
+        if (!pi0.Reconstruct(fNNeutral, fPartNeutral))
+            goto label_end_cb_timewalk_ept;
+
+        // get the invariant mass
+        TLorentzVector* p4Pi0 = pi0.Get4Vector();
+        Double_t im = p4Pi0->M();
+        fHCalib_CB_Walk_EPT_IM->Fill(im);
+
+        // invariant mass cut
+        if (im < fCalib_CB_Walk_EPT_Pi0_Min || im > fCalib_CB_Walk_EPT_Pi0_Max)
+            goto label_end_cb_timewalk_ept;
+
+        // assume the charged particle to be a proton
+        TOA2DetParticle* proton = fPartCharged[0];
+        TLorentzVector* p4proton = new TLorentzVector();
+        proton->Calculate4Vector(p4proton, TOGlobals::kProtonMass);
+
+        // phi difference cut
+        Double_t phi = TMath::Abs(p4proton->Phi() - p4Pi0->Phi())*TMath::RadToDeg();
+        fHCalib_CB_Walk_EPT_Phi->Fill(phi);
+        if(phi<fCalib_CB_Walk_EPT_Phi_Min || phi>fCalib_CB_Walk_EPT_Phi_Max)
+            goto label_end_cb_timewalk_ept;
+
+        // proton properties
+        Int_t     p_nhits  = proton->GetClusterSize();
+        UInt_t*   p_hits   = proton->GetClusterHits();
+        Double_t* p_energy = proton->GetClusterHitEnergies();
+        Double_t* p_time   = proton->GetClusterHitTimes();
+        Double_t  p_time_pid  = proton->GetPIDTime();
+
+        // fill the timewalk histograms
+        // use the PID time as time reference
+        for (Int_t j = 0; j < p_nhits; j++)
+            fHCalib_CB_Walk_EPT_E_T[p_hits[j]]->Fill(p_energy[j], p_time[j] - p_time_pid);
+
+    } // end CB time walk
+    label_end_cb_timewalk_ept:
+
+
+    // --------------------------- CB proton energy correction ----------------------------
+
     if (fCalib_CB_Proton_ECorr)
     {
         if (fCBNCluster == 1)

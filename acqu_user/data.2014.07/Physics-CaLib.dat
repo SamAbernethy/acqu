@@ -79,9 +79,9 @@ CaLib-Tagger-Time: 1
 # Ensure that you have enough statistics for the time walk correction
 
 # CB time walk calibration
-# For EPT, use prompt_min>prompt_max, which disables any kind of tagging information
-#              on/off  pi0_min  pi0_max  prompt_min  prompt_max  bg1_min  bg1_max  bg2_min  bg2_max  mm_min  mm_max
-CaLib-CB-Walk: 1       120      150      5           -5          50     -20        20       -50      -100    100
+# For EPT, we use the method from Marc Unverzagt's thesis
+#                   on/off  pi0_min  pi0_max  phi_min  phi_max
+CaLib-CB-Walk-EPT: 1       115      155      170      190
 
 # TAPS energy calibration
 CaLib-TAPS-Energy: 1

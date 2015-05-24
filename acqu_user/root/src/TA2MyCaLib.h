@@ -30,6 +30,7 @@ enum {
     ECALIB_CB_TIME,
     ECALIB_CB_RISETIME,
     ECALIB_CB_WALK,
+    ECALIB_CB_WALK_EPT,
     ECALIB_CBTAPS_LED,
     ECALIB_CB_PROTON_ECORR,
     ECALIB_TAPS_ENERGY,
@@ -69,6 +70,7 @@ static const Map_t myCaLibConfigKeys[] = {
     {"CaLib-CB-Time:"                 ,   ECALIB_CB_TIME              },        // CB time calibration
     {"CaLib-CB-RiseTime:"             ,   ECALIB_CB_RISETIME          },        // CB rise time calibration
     {"CaLib-CB-Walk:"                 ,   ECALIB_CB_WALK              },        // CB time walk calibration
+    {"CaLib-CB-Walk-EPT:"             ,   ECALIB_CB_WALK_EPT          },        // CB time walk calibration for EPT
     {"CaLib-CB-Proton-Energy-Corr:"   ,   ECALIB_CB_PROTON_ECORR      },        // CB proton energy correction
     {"CaLib-CB-TAPS-LED:"             ,   ECALIB_CBTAPS_LED           },        // CB-TAPS LED thresholds
     {"CaLib-TAPS-Energy:"             ,   ECALIB_TAPS_ENERGY          },        // TAPS energy calibration
@@ -160,8 +162,19 @@ private:
     TH2* fHCalib_CB_Walk_MM;                                // pi0 missing mass for g + p -> p + pi0 identification
     TH1* fHCalib_CB_Walk_Rand_Time_CB;                      // CB-tagger time difference for random subtraction
     TH2** fHCalib_CB_Walk_E_T;                              // time vs energy for all CB elements
-    
-    // --------------------------- CB proton energy correction ----------------------------- 
+
+    // ----------------------------------- CB time walk for EPT  ------------------------------------
+    Int_t fCalib_CB_Walk_EPT;                               // CB time walk calibration toggle
+    Double_t fCalib_CB_Walk_EPT_Pi0_Min;                    // lower bound of the pi0 invariant mass cut
+    Double_t fCalib_CB_Walk_EPT_Pi0_Max;                    // upper bound of the pi0 invariant mass cut
+    Double_t fCalib_CB_Walk_EPT_Phi_Min;                    // lower bound of the pi0/proton back2back phi cut
+    Double_t fCalib_CB_Walk_EPT_Phi_Max;                    // upper bound of the pi0/proton back2back phi cut
+    TH1* fHCalib_CB_Walk_EPT_IM;                            // 2 photon invariant mass for pi0 identification
+    TH1* fHCalib_CB_Walk_EPT_Phi;                           // angle between pi0 and proton
+    TH2** fHCalib_CB_Walk_EPT_E_T;                          // time vs energy for all CB elements
+
+
+    // --------------------------- CB proton energy correction -----------------------------
     Int_t fCalib_CB_Proton_ECorr;                           // CB proton energy correction
     TH2** fHCalib_CB_Proton_ECorr;                          // f_corr vs measured energy for every detector
     TH2** fHCalib_CB_Proton_ECorr_Inv;                      // f_corr vs vertex energy for every detector

@@ -1460,8 +1460,9 @@ void TA2MyCaLib::ReconstructPhysics()
 
         // fill the timewalk histograms
         // use the PID time as time reference
-        for (Int_t j = 0; j < p_nhits; j++)
-            fHCalib_CB_Walk_EPT_E_T[p_hits[j]]->Fill(p_energy[j], p_time[j] - p_time_pid);
+        // and only the central element of the cluster (which is the first in the array by convention)
+        if(p_nhits>0)
+            fHCalib_CB_Walk_EPT_E_T[p_hits[0]]->Fill(p_energy[0], p_time[0] - p_time_pid);
 
     } // end CB time walk
     label_end_cb_timewalk_ept:

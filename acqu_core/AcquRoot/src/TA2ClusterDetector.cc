@@ -535,6 +535,7 @@ void TA2ClusterDetector::DecodeCluster( )
           crystal_t(idx,
                     fEnergy[idx],
                     fTime[idx],
+                    fElement[idx]->GetNhit(),
                     *(fPosition[idx]),
                     fCluster[idx]->GetNNeighbour(),
                     fCluster[idx]->GetNeighbour(),

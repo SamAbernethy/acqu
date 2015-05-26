@@ -169,6 +169,8 @@ private:
     Double_t fCalib_CB_Walk_EPT_Pi0_Max;                    // upper bound of the pi0 invariant mass cut
     Double_t fCalib_CB_Walk_EPT_Phi_Min;                    // lower bound of the pi0/proton back2back phi cut
     Double_t fCalib_CB_Walk_EPT_Phi_Max;                    // upper bound of the pi0/proton back2back phi cut
+    Double_t fCalib_CB_Walk_EPT_ProtonE_Min;                // lower bound of the proton energy
+    Double_t fCalib_CB_Walk_EPT_ProtonE_Max;                // upper bound of the proton energy
     TH1* fHCalib_CB_Walk_EPT_IM;                            // 2 photon invariant mass for pi0 identification
     TH1* fHCalib_CB_Walk_EPT_Phi;                           // angle between pi0 and proton
     TH2** fHCalib_CB_Walk_EPT_E_T;                          // time vs energy for all CB elements

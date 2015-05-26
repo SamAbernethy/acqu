@@ -273,10 +273,11 @@ void TA2MyCaLib::SetConfig(Char_t* line, Int_t key)
             break;
         case ECALIB_CB_WALK_EPT:
             // Enable CB time walk calibration for EPT
-            if (sscanf(line, "%d%lf%lf%lf%lf",
+            if (sscanf(line, "%d%lf%lf%lf%lf%lf%lf",
                        &fCalib_CB_Walk_EPT,
                        &fCalib_CB_Walk_EPT_Pi0_Min, &fCalib_CB_Walk_EPT_Pi0_Max,
-                       &fCalib_CB_Walk_EPT_Phi_Min, &fCalib_CB_Walk_EPT_Phi_Max) != 5) error = kTRUE;
+                       &fCalib_CB_Walk_EPT_Phi_Min, &fCalib_CB_Walk_EPT_Phi_Max,
+                       &fCalib_CB_Walk_EPT_ProtonE_Min, &fCalib_CB_Walk_EPT_ProtonE_Max) != 7) error = kTRUE;
             if (fCalib_CB_Walk_EPT) fNCalib++;
             break;
 
@@ -554,7 +555,8 @@ void TA2MyCaLib::PostInit()
     {
         printf("   - CB time walk for EPT\n");
         printf("     -> pi0 invariant mass cut     : %8.2f to %8.2f MeV\n", fCalib_CB_Walk_EPT_Pi0_Min, fCalib_CB_Walk_EPT_Pi0_Max);
-        printf("     -> pi0/proton phi cut         : %8.2f to %8.2f MeV\n", fCalib_CB_Walk_EPT_Phi_Min, fCalib_CB_Walk_EPT_Phi_Max);
+        printf("     -> pi0/proton phi cut         : %8.2f to %8.2f Degree\n", fCalib_CB_Walk_EPT_Phi_Min, fCalib_CB_Walk_EPT_Phi_Max);
+        printf("     -> proton energy cut          : %8.2f to %8.2f MeV\n", fCalib_CB_Walk_EPT_ProtonE_Min, fCalib_CB_Walk_EPT_ProtonE_Max);
     }
     if (fCalib_CB_Proton_ECorr) printf("   - CB proton energy correction\n");
     if (fCalib_CBTAPS_LED)  printf("   - CB-TAPS LED\n");
@@ -1450,19 +1452,40 @@ void TA2MyCaLib::ReconstructPhysics()
         fHCalib_CB_Walk_EPT_Phi->Fill(phi);
         if(phi<fCalib_CB_Walk_EPT_Phi_Min || phi>fCalib_CB_Walk_EPT_Phi_Max)
             goto label_end_cb_timewalk_ept;
+        
+        // use only high energetic protons to have minimal timewalk
+        // timewalk calibration could also be iterated to minimize bias
+        Double_t proton_energy = proton->GetEnergy();
+        if(proton_energy<fCalib_CB_Walk_EPT_ProtonE_Min || proton_energy>fCalib_CB_Walk_EPT_ProtonE_Max)
+            goto label_end_cb_timewalk_ept;
+        Double_t proton_time = proton->GetTime();
+        
+        // fill the timings of the two photons
+        TOA2DetParticle** decay_photons = pi0.GetDetectedProducts();        
+        
+        // photon 1 cluster properties
+        Int_t g1_nhits      = decay_photons[0]->GetClusterSize();
+        UInt_t* g1_hits     = decay_photons[0]->GetClusterHits();
+        Double_t* g1_energy = decay_photons[0]->GetClusterHitEnergies();
+        Double_t* g1_time   = decay_photons[0]->GetClusterHitTimes();
 
-        // proton properties
-        Int_t     p_nhits  = proton->GetClusterSize();
-        UInt_t*   p_hits   = proton->GetClusterHits();
-        Double_t* p_energy = proton->GetClusterHitEnergies();
-        Double_t* p_time   = proton->GetClusterHitTimes();
-        Double_t  p_time_pid  = proton->GetPIDTime();
-
-        // fill the timewalk histograms
-        // use the PID time as time reference
-        // and only the central element of the cluster (which is the first in the array by convention)
-        if(p_nhits>0)
-            fHCalib_CB_Walk_EPT_E_T[p_hits[0]]->Fill(p_energy[0], p_time[0] - p_time_pid);
+        // photon 2 cluster properties
+        Int_t g2_nhits      = decay_photons[1]->GetClusterSize();
+        UInt_t* g2_hits     = decay_photons[1]->GetClusterHits();
+        Double_t* g2_energy = decay_photons[1]->GetClusterHitEnergies();
+        Double_t* g2_time   = decay_photons[1]->GetClusterHitTimes();    
+        
+        // use only first crystal (with highest energy) of both photons
+//        if(g1_nhits>1) g1_nhits=1;
+//        if(g2_nhits>1) g2_nhits=1;
+        
+        // fill energies and times of all elements of the photon cluster 1
+        for (Int_t j = 0; j < g1_nhits; j++) 
+            fHCalib_CB_Walk_EPT_E_T[g1_hits[j]]->Fill(g1_energy[j], g1_time[j] - proton_time);
+    
+        // fill energies and times of all elements of the photon cluster 2
+        for (Int_t j = 0; j < g2_nhits; j++) 
+            fHCalib_CB_Walk_EPT_E_T[g2_hits[j]]->Fill(g2_energy[j], g2_time[j] - proton_time);
 
     } // end CB time walk
     label_end_cb_timewalk_ept:
